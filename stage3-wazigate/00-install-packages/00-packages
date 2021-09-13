@@ -1,0 +1,2 @@
+curl git gawk network-manager ntp ntpdate dnsmasq hostapd i2c-tools libopenjp2-7 libtiff5 avahi-daemon libmicrohttpd-dev plymouth
+docker docker-compose
