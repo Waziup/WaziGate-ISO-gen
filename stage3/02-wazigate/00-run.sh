@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-DEFAULT_WAZIGATE_BRANCH="prepare-pi-gen"
+DEFAULT_WAZIGATE_BRANCH="master"
 if [ -z "$WAZIGATE_BRANCH" ]; then
 	WAZIGATE_BRANCH=$DEFAULT_WAZIGATE_BRANCH
 fi
