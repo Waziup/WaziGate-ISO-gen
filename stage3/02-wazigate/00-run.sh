@@ -22,10 +22,16 @@ chmod +x $WAZIGATE_DIR/setup.sh
 # Download Wazigate Docker Images from Docker Hub
 
 if [ -f "files/wazigate-mongo.tar" ]; then
-  docker pull --platform linux/arm/v7 waziup/wazigate-mongo
-  docker image save waziup/wazigate-mongo -o files/wazigate-mongo.tar
+  echo "Using wazigate-mongo docker image from wazigate-mongo.tar"
+else
+  echo "Pulling wazigate-mongo from docker hub ..."
+  docker pull --platform linux/arm/v7 webhippie/mongodb
+  docker image save webhippie/mongodb -o files/wazigate-mongo.tar
 fi
-if [ -f "files/wazigate-edge" ]; then
+if [ -f "files/wazigate-edge.tar" ]; then
+  echo "Using wazigate-edge docker image from wazigate-edge.tar"
+else
+  echo "Pulling wazigate-edge from docker hub ..."
   docker pull --platform linux/arm/v7 waziup/wazigate-edge
   docker image save waziup/wazigate-edge -o files/wazigate-edge.tar
 fi
