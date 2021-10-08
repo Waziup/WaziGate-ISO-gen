@@ -8,7 +8,7 @@ pipeline {
     }
     stage('Build') {
       steps {
-        sh 'sudo ./build.sh'
+        sh 'sudo CLEAN=1 ./build.sh'
       }
     }
   }
