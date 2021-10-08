@@ -14,7 +14,7 @@ pipeline {
   }
   post {
     success {
-      echo 'Success!'
+      archiveArtifacts artifacts: 'deploy/*', fingerprint: true
     }
     failure {
       echo 'Failure!'
