@@ -11,10 +11,6 @@ pipeline {
         sh 'sudo ./build.sh'
       }
     }
-    stage('Finalize') {
-      steps {
-      }
-    }
   }
   post {
     success {
