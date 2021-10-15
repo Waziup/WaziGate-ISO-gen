@@ -5,6 +5,11 @@ if [ -z "$WAZIGATE_BRANCH" ]; then
 	WAZIGATE_BRANCH=$DEFAULT_WAZIGATE_BRANCH
 fi
 
+DEFAULT_WAZIGATE_TAG="latest"
+if [ -z "$WAZIGATE_TAG" ]; then
+	WAZIGATE_TAG=$DEFAULT_WAZIGATE_TAG
+fi
+
 WAZIGATE_DIR=$ROOTFS_DIR/var/lib/wazigate
 # WAZIGATE_DIR=$ROOTFS_DIR/home/${FIRST_USER_NAME}/wazigate
 
@@ -33,9 +38,9 @@ function install_docker_image {
   install -m 644 files/$1.tar  $WAZIGATE_DIR/
 }
 
-install_docker_image "wazigate-mongo" "webhippie/mongodb"
-install_docker_image "wazigate-edge" "wazigate-edge"
-install_docker_image "wazigate-system" "wazigate-system"
+install_docker_image "wazigate-mongo" "webhippie/mongodb:latest"
+install_docker_image "wazigate-edge" "waziup/wazigate-edge:$WAZIGATE_TAG"
+install_docker_image "wazigate-system" "waziup/wazigate-system:$WAZIGATE_TAG"
 
 
 ################################################################################
