@@ -1,5 +1,8 @@
 pipeline {
   agent any
+  environment {
+    WAZIGATE_TAG = 'nightly'
+  }
   stages {
     stage('Prepare') {
       steps {
