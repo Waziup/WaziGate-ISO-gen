@@ -18,27 +18,25 @@ chmod +x $WAZIGATE_DIR/setup.sh
 
 ################################################################################
 
+function install_docker_image {
 
-# Download Wazigate Docker Images from Docker Hub
+  # Download Docker Image from Docker Hub
+  if [ -f "files/$1.tar" ]; then
+    echo "Using $1 docker image from $1.tar"
+  else
+    echo "Pulling $1 from docker hub ..."
+    docker pull --platform linux/arm/v7 $2
+    docker image save $2 -o files/$1.tar
+  fi
 
-if [ -f "files/wazigate-mongo.tar" ]; then
-  echo "Using wazigate-mongo docker image from wazigate-mongo.tar"
-else
-  echo "Pulling wazigate-mongo from docker hub ..."
-  docker pull --platform linux/arm/v7 webhippie/mongodb
-  docker image save webhippie/mongodb -o files/wazigate-mongo.tar
-fi
-if [ -f "files/wazigate-edge.tar" ]; then
-  echo "Using wazigate-edge docker image from wazigate-edge.tar"
-else
-  echo "Pulling wazigate-edge from docker hub ..."
-  docker pull --platform linux/arm/v7 waziup/wazigate-edge
-  docker image save waziup/wazigate-edge -o files/wazigate-edge.tar
-fi
+  # Copy Docker Images
+  install -m 644 files/$1.tar  $WAZIGATE_DIR/
+}
 
-# Copy Wazigate Docker Images
-install -m 644 files/wazigate-mongo.tar $WAZIGATE_DIR/
-install -m 644 files/wazigate-edge.tar  $WAZIGATE_DIR/
+install_docker_image "wazigate-mongo" "webhippie/mongodb"
+install_docker_image "wazigate-edge" "wazigate-edge"
+install_docker_image "wazigate-system" "wazigate-system"
+
 
 ################################################################################
 
@@ -61,16 +59,13 @@ echo "static domain_name_servers=8.8.8.8" >> $ROOTFS_DIR/etc/dhcpcd.conf
 
 # cp setup/clouds.json wazigate-edge
 
-
-# chmod a+x ./start.sh
-# chmod a+x ./stop.sh
-
 # Run setup.sh as systemd service on boot  
 cp $WAZIGATE_DIR/wazigate-setup.service $ROOTFS_DIR/etc/systemd/system
 
 # Run wazigate-host as systemd service on boot  
 cp $WAZIGATE_DIR/wazigate-host/wazigate-host $ROOTFS_DIR/usr/bin
 cp $WAZIGATE_DIR/wazigate-host/wazigate-host.service $ROOTFS_DIR/etc/systemd/system
+
 
 # Enable Wazigate services
 on_chroot <<EOF
