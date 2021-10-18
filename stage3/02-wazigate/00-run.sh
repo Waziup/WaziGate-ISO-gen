@@ -25,6 +25,10 @@ chmod +x $WAZIGATE_DIR/setup.sh
 
 function install_docker_image {
 
+  # Cleaning existing image
+  if [ "${CLEAN}" = "1" ] && [ -f "files/$1.tar" ]; then
+    rm -f "files/$1.tar";
+  fi
   # Download Docker Image from Docker Hub
   if [ -f "files/$1.tar" ]; then
     echo "Using $1 docker image from $1.tar"
