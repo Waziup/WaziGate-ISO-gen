@@ -33,7 +33,7 @@ function install_docker_image {
   if [ -f "files/$1.tar" ]; then
     echo "Using $1 docker image from $1.tar"
   else
-    echo "Pulling $1 from docker hub ..."
+    echo "Pulling $2 from docker hub ..."
     docker pull --platform linux/arm/v7 $2
     docker image save $2 -o files/$1.tar
   fi
