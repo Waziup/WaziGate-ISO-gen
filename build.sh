@@ -264,6 +264,8 @@ fi
 
 export NO_PRERUN_QCOW2="${NO_PRERUN_QCOW2:-1}"
 
+export WAZIGATE_TAG
+
 dependencies_check "${BASE_DIR}/depends"
 
 #check username is valid
