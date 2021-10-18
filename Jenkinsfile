@@ -1,12 +1,10 @@
 pipeline {
   agent any
-  environment {
-    WAZIGATE_TAG = 'nightly'
-  }
   stages {
     stage('Prepare') {
       steps {
         sh 'echo "IMG_NAME=WaziGate" > config'
+        sh 'echo "WAZIGATE_TAG=nightly" >> config'
       }
     }
     stage('Build') {
