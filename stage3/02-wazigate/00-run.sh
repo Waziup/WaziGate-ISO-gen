@@ -23,6 +23,10 @@ chmod +x $WAZIGATE_DIR/setup.sh
 
 ################################################################################
 
+if [ "${CLEAN}" = "1" ]; then
+  rm -rf files/*.tar
+fi
+
 function install_docker_image {
 
   # Cleaning existing image
