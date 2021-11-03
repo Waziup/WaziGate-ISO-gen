@@ -3,8 +3,8 @@ pipeline {
   stages {
     stage('Prepare') {
       steps {
-        sh 'echo "IMG_NAME=WaziGate" > config'
-        sh 'echo "IMG_DATE=nightly" > config'
+        sh 'echo "IMG_NAME=WaziGate" >> config'
+        sh 'echo "IMG_DATE=nightly" >> config'
         sh 'echo "ENABLE_SSH=1" >> config'
         sh 'echo "FIRST_USER_PASS=loragateway" >> config'
         sh 'echo "TARGET_HOSTNAME=wazigate" >> config'
