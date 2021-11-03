@@ -4,7 +4,7 @@ pipeline {
     stage('Prepare') {
       steps {
         sh 'echo "IMG_NAME=WaziGate" > config'
-        sh 'echo "WAZIGATE_TAG=nightly" >> config'
+        sh 'echo "IMG_DATE=nightly'
         sh 'echo "ENABLE_SSH=1" >> config'
       }
     }
