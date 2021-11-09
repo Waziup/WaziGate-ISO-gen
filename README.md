@@ -1,6 +1,6 @@
-# pi-gen
+# wazigate-gen
 
-Tool used to create Raspberry Pi OS images. (Previously known as Raspbian).
+Tool used to create Wazigate images for Raspberry Pi. It is based on the [pi-gen](https://github.com/RPi-Distro/pi-gen) repository, the tool used to create Raspberry Pi OS images. (Previously known as Raspbian).
 
 
 ## Dependencies
@@ -10,7 +10,7 @@ either Debian Buster or Ubuntu Xenial and is known to have issues building on
 earlier releases of these systems. On other Linux distributions it may be possible
 to use the Docker build described below.
 
-To install the required dependencies for `pi-gen` you should run:
+To install the required dependencies for `wazigate-gen` you should run:
 
 ```bash
 apt-get install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
@@ -20,6 +20,8 @@ qemu-utils kpartx
 
 The file `depends` contains a list of tools needed.  The format of this
 package is `<tool>[:<debian-package>]`.
+
+In stage 2 this tool will install basic WaziApps on the image. WaziApps are base on Docker images, so you will also need to install [Docker](https://docs.docker.com/get-docker/) on your machine. The scripts will use Docker to pull some images from the Docker hub and place them inside the new OS.
 
 
 ## Config
@@ -317,18 +319,9 @@ maintenance and allows for more easy customization.
    you were looking for something between truly minimal and Raspbian-Lite,
    here's where you start trimming.
 
- - **Stage 3** - desktop system.  Here's where you get the full desktop system
-   with X11 and LXDE, web browsers, git for development, Raspbian custom UI
-   enhancements, etc.  This is a base desktop system, with some development
-   tools installed.
-
- - **Stage 4** - Normal Raspbian image. System meant to fit on a 4GB card. This is the
-   stage that installs most things that make Raspbian friendly to new
-   users like system documentation.
-
- - **Stage 5** - The Raspbian Full image. More development
-   tools, an email client, learning tools like Scratch, specialized packages
-   like sonic-pi, office productivity, etc.  
+ - **Stage 3** - WaziGate.  Other than with the original pi-gen tool, this stage
+   is the final stage. It will install Docker and the Wazigate library
+   (at `/var/lib/wazigate/`), together with some preinstalled WaziApps.
 
 ### Stage specification
 

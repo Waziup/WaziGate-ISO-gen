@@ -4,24 +4,34 @@ DEFAULT_WAZIGATE_BRANCH="master"
 if [ -z "$WAZIGATE_BRANCH" ]; then
 	WAZIGATE_BRANCH=$DEFAULT_WAZIGATE_BRANCH
 fi
-echo "tag=$WAZIGATE_TAG"
+
 DEFAULT_WAZIGATE_TAG="latest"
 if [ -z "$WAZIGATE_TAG" ]; then
 	WAZIGATE_TAG=$DEFAULT_WAZIGATE_TAG
 fi
 
-WAZIGATE_DIR=$ROOTFS_DIR/var/lib/wazigate
+DEFAULT_WAZIGATE_REPO="https://github.com/Waziup/WaziGate.git"
+if [ -z "$WAZIGATE_REPO" ]; then
+	WAZIGATE_REPO=$DEFAULT_WAZIGATE_REPO
+fi
+
 # WAZIGATE_DIR=$ROOTFS_DIR/home/${FIRST_USER_NAME}/wazigate
 
 ################################################################################
 
 
+WAZIGATE_DIR=$ROOTFS_DIR/var/lib/wazigate
+
 # Download Wazigate Repo
-git clone -b $WAZIGATE_BRANCH --single-branch https://github.com/Waziup/WaziGate.git $WAZIGATE_DIR
+# git clone -b $WAZIGATE_BRANCH --single-branch $WAZIGATE_REPO $WAZIGATE_DIR
+cp -R files/wazigate $ROOTFS_DIR/var/lib
+
 chmod +x $WAZIGATE_DIR/wazigate-host/wazigate-host
 chmod +x $WAZIGATE_DIR/setup.sh
+sed -i "s/^WAZIGATE_TAG.*/WAZIGATE_TAG=$WAZIGATE_TAG/g" $WAZIGATE_DIR/.env
 
 ################################################################################
+
 
 if [ "${CLEAN}" = "1" ]; then
   rm -rf files/*.tar
@@ -45,11 +55,19 @@ function install_docker_image {
   # Copy Docker Images
   install -m 644 files/$1.tar  $WAZIGATE_DIR/
 }
-
-install_docker_image "wazigate-mongo" "webhippie/mongodb:latest"
+# WaziGate Core (WaziGate-Edge and MongoDB)
+# install_docker_image "wazigate-mongo" "webhippie/mongodb:latest"
 install_docker_image "wazigate-edge" "waziup/wazigate-edge:$WAZIGATE_TAG"
+# WaziGate-System App
 install_docker_image "wazigate-system" "waziup/wazigate-system:$WAZIGATE_TAG"
-
+# WaziGate-LoRa App
+install_docker_image "wazigate-lora" "waziup/wazigate-lora:$WAZIGATE_TAG"
+install_docker_image "chirpstack-network-server" "waziup/chirpstack-network-server:3.11.0"
+install_docker_image "chirpstack-application-server" "waziup/chirpstack-application-server:3.13.2"
+install_docker_image "chirpstack-gateway-bridge" "waziup/chirpstack-gateway-bridge:3.9.2"
+install_docker_image "postgresql" "waziup/wazigate-postgresql"
+install_docker_image "redis" "redis:5-alpine"
+install_docker_image "wazigate-lora-forwarders" "waziup/wazigate-lora-forwarders"
 
 ################################################################################
 
@@ -60,7 +78,7 @@ rm -f "$ROOTFS_DIR/etc/systemd/system/dhcpcd.service.d/wait.conf"
 mv --backup=numbered $ROOTFS_DIR/etc/dnsmasq.conf $ROOTFS_DIR/etc/dnsmasq.conf.orig
 echo 'interface=wlan0\n  dhcp-range=192.168.200.2,192.168.200.200,255.255.255.0,24h\n' > $ROOTFS_DIR/etc/dnsmasq.conf
 
-cp $WAZIGATE_DIR/setup/hostapd.conf $ROOTFS_DIR/etc/hostapd/hostapd.conf
+cp files/hostapd.conf $ROOTFS_DIR/etc/hostapd/hostapd.conf
 
 if ! grep -qFx 'DAEMON_CONF="/etc/hostapd/hostapd.conf"' $ROOTFS_DIR/etc/default/hostapd; then
   sed -i -e '$i \DAEMON_CONF="/etc/hostapd/hostapd.conf"\n' $ROOTFS_DIR/etc/default/hostapd
@@ -87,12 +105,12 @@ systemctl enable wazigate-host
 EOF
 
 # Enable SPI
-echo -e '\ndtparam=i2c_arm=on' >> $ROOTFS_DIR/boot/config.txt
+# echo -e '\ndtparam=i2c_arm=on' >> $ROOTFS_DIR/boot/config.txt
 
 # Enable I2C
-echo ' bcm2708.vc_i2c_override=1' >> $ROOTFS_DIR/boot/cmdline.txt
-echo -e '\ni2c-bcm2708' >> $ROOTFS_DIR/etc/modules-load.d/raspberrypi.conf
-echo -e '\ni2c-dev' >> $ROOTFS_DIR/etc/modules-load.d/raspberrypi.conf
+# echo ' bcm2708.vc_i2c_override=1' >> $ROOTFS_DIR/boot/cmdline.txt
+# echo -e '\ni2c-bcm2708' >> $ROOTFS_DIR/etc/modules-load.d/raspberrypi.conf
+# echo -e '\ni2c-dev' >> $ROOTFS_DIR/etc/modules-load.d/raspberrypi.conf
 
 # Show text-ui on login
 echo -e "sudo bash /var/lib/wazigate/wazigate-host/text-ui.sh" >> $ROOTFS_DIR/home/$FIRST_USER_NAME/.profile
