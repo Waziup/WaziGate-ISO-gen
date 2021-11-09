@@ -1,5 +1,5 @@
 # Set the default behavior for all files.
-* text=auto
+* text=auto eol=lf
 
 # Convert to LF line endings on checkout.
 *.sh text eol=lf
