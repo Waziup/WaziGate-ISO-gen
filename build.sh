@@ -266,6 +266,8 @@ export NO_PRERUN_QCOW2="${NO_PRERUN_QCOW2:-1}"
 
 export WAZIGATE_TAG
 
+export RASPIAN_REPO="${RASPBIAN_REPO:-http://raspbian.raspberrypi.org/raspbian}"
+
 dependencies_check "${BASE_DIR}/depends"
 
 #check username is valid
