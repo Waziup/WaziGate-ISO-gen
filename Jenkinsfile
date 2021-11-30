@@ -10,6 +10,8 @@ pipeline {
         sh 'echo "TARGET_HOSTNAME=wazigate" >> config'
         sh 'echo "PI_GEN_REPO=https://github.com/Waziup/WaziGate-ISO-gen" >> config'
         sh 'echo "TARGET_HOSTNAME=wazigate" >> config'
+        sh 'echo "WAZIGATE_TAG=nightly" >> config'
+        sh 'echo "RASPBIAN_REPO=http://mirror.de.leaseweb.net/raspbian/raspbian/" >> config'
       }
     }
     stage('Build') {
