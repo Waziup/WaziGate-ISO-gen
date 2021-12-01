@@ -33,11 +33,14 @@ echo "Docker: Channel $CHANNEL, Dist $lsb_dist / $dist_version"
 apt_repo="deb [arch=armhf signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] $DOWNLOAD_URL/linux/$lsb_dist $dist_version $CHANNEL"
 pre_reqs="apt-transport-https ca-certificates curl gnupg"
 
-curl -fsSL "$DOWNLOAD_URL/linux/$lsb_dist/gpg" | gpg --dearmor --yes -o $ROOTFS_DIR/usr/share/keyrings/docker-archive-keyring.gpg
-echo "$apt_repo" > $ROOTFS_DIR/etc/apt/sources.list.d/docker.list
+curl -fsSL "$DOWNLOAD_URL/linux/$lsb_dist/gpg" | gpg --dearmor --yes -o "$ROOTFS_DIR/usr/share/keyrings/docker-archive-keyring.gpg"
+echo "$apt_repo" > "$ROOTFS_DIR/etc/apt/sources.list.d/docker.list"
 
 on_chroot <<EOF
 apt-get update -qq
 apt-get install -y -qq --no-install-recommends apt-transport-https ca-certificates curl gnupg docker-ce
 adduser "$FIRST_USER_NAME" docker
 EOF
+
+mkdir -p "${ROOTFS_DIR}/etc/docker"
+install -m 644 files/daemon.json "${ROOTFS_DIR}/etc/docker/daemon.json"

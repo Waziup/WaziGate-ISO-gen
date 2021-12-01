@@ -48,6 +48,7 @@ if ! docker image inspect waziup/wazigate-edge --format {{.Id}} > /dev/null; the
   echo "Creating container 'wazigate-edge' (Wazigate Edge) ..."
   # docker image save waziup/wazigate-edge -o wazigate-edge.tar
   docker image load -i wazigate-edge.tar
+  rm wazigate-edge.tar
   docker run -d --restart=always --network=wazigate --name wazigate-edge \
     -e "WAZIGATE_ID=$WAZIGATE_ID" \
     -e "WAZIGATE_VERSION=$WAZIGATE_VERSION" \
@@ -58,13 +59,14 @@ if ! docker image inspect waziup/wazigate-edge --format {{.Id}} > /dev/null; the
     -v "/var/run/wazigate-host.sock:/var/run/wazigate-host.sock" \
     -v "$PWD/apps:/root/apps" \
     -p "80:80" -p "1883:1883" \
-    waziup/wazigate-edge
+    waziup/wazigate-edge:$WAZIGATE_TAG
 fi
 
 if ! docker image inspect waziup/wazigate-system --format {{.Id}} > /dev/null; then
   echo "Creating container 'wazigate-system' (Wazigate System) ..."
   # docker image save waziup/wazigate-system -o wazigate-system.tar
   docker image load -i wazigate-system.tar
+  rm wazigate-system.tar
   docker run -d --restart=unless-stopped --network=host --name waziup.wazigate-system \
     -v "$PWD/apps/waziup.wazigate-system:/var/lib/waziapp" \
     -v "/var/run:/var/run" \
@@ -73,7 +75,7 @@ if ! docker image inspect waziup/wazigate-system --format {{.Id}} > /dev/null; t
     --privileged \
     --health-cmd="curl --fail --unix-socket /var/lib/waziapp/proxy.sock http://localhost/ || exit 1" \
     --health-interval=10s \
-    waziup/wazigate-system
+    waziup/wazigate-system:$WAZIGATE_TAG
 fi
 
 ################################################################################
@@ -84,6 +86,7 @@ if ! docker image inspect waziup/wazigate-lora --format {{.Id}} > /dev/null; the
 
   echo "Creating container 'waziup.wazigate-lora.forwarders' (Wazigate-LoRa App - Forwarders) ..."
   docker image load -i wazigate-lora-forwarders.tar
+  rm wazigate-lora-forwarders.tar
   docker run -d --restart=unless-stopped --network=wazigate --name "waziup.wazigate-lora.forwarders" \
     -v "$PWD/apps/waziup.wazigate-lora/forwarders/:/root/conf" \
     -v "/var/run/dbus:/var/run/dbus" \
@@ -100,12 +103,14 @@ if ! docker image inspect waziup/wazigate-lora --format {{.Id}} > /dev/null; the
 
   echo "Creating container 'redis' (Wazigate-LoRa App - Redis) ..."
   docker image load -i redis.tar
+  rm redis.tar
   docker run -d --restart=unless-stopped --network=wazigate --name redis \
     -v "redisdata:/data" \
-    redis:5-alpine
+    redis:6-alpine --appendonly yes --maxmemory 100mb --tcp-backlog 128
 
   echo "Creating container 'postgresql' (Wazigate-LoRa App - PostgreSQL) ..."
   docker image load -i postgresql.tar
+  rm postgresql.tar
   docker run -d --restart=unless-stopped --network=wazigate --name postgresql \
     -v "$PWD/apps/waziup.wazigate-lora/postgresql/initdb:/docker-entrypoint-initdb.d" \
     -v "postgresqldata:/var/lib/postgresql/data" \
@@ -114,6 +119,7 @@ if ! docker image inspect waziup/wazigate-lora --format {{.Id}} > /dev/null; the
 
   echo "Creating container 'chirpstack-gateway-bridge' (Wazigate-LoRa App - ChirptStack Gateway Bridge) ..."
   docker image load -i chirpstack-gateway-bridge.tar
+  rm chirpstack-gateway-bridge.tar
   docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate-lora.chirpstack-gateway-bridge \
     -v "$PWD/apps/waziup.wazigate-lora/chirpstack-gateway-bridge:/etc/chirpstack-gateway-bridge" \
     -p "1700:1700/udp" \
@@ -122,6 +128,7 @@ if ! docker image inspect waziup/wazigate-lora --format {{.Id}} > /dev/null; the
 
   echo "Creating container 'chirpstack-application-server' (Wazigate-LoRa App - ChirptStack Application Server) ..."
   docker image load -i chirpstack-application-server.tar
+  rm chirpstack-application-server.tar
   docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate-lora.chirpstack-application-server \
     -v "$PWD/apps/waziup.wazigate-lora/chirpstack-application-server:/etc/chirpstack-application-server" \
     -p "8080:8080" \
@@ -130,6 +137,7 @@ if ! docker image inspect waziup/wazigate-lora --format {{.Id}} > /dev/null; the
 
   echo "Creating container 'chirpstack-network-server' (Wazigate-LoRa App - ChirptStack Network Server) ..."
   docker image load -i chirpstack-network-server.tar
+  rm chirpstack-network-server.tar
   docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate-lora.chirpstack-network-server \
     -v "$PWD/apps/waziup.wazigate-lora/chirpstack-network-server:/etc/chirpstack-network-server" \
     --label "io.waziup.waziapp=waziup.wazigate-lora" \
@@ -137,10 +145,11 @@ if ! docker image inspect waziup/wazigate-lora --format {{.Id}} > /dev/null; the
 
   echo "Creating container 'waziup.wazigate-lora' (Wazigate-LoRa App) ..."
   docker image load -i wazigate-lora.tar
+  rm wazigate-lora.tar
   docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate-lora \
     -v "$PWD/apps/waziup.wazigate-lora:/var/lib/waziapp" \
     --health-cmd="curl --fail --unix-socket /var/lib/waziapp/proxy.sock http://localhost/ || exit 1" \
     --health-interval=10s \
     --label "io.waziup.waziapp=waziup.wazigate-lora" \
-    waziup/wazigate-lora
+    waziup/wazigate-lora:$WAZIGATE_TAG
 fi
