@@ -17,16 +17,22 @@ pipeline {
         sh 'sudo CLEAN=1 ./build.sh'
       }
     }
+    stage('Stage') {
+      steps {
+        sh "sudo sshpass -p loragateway ssh pi@$WAZIGATE_IP \\'sudo reboot now\\'"
+      }
+    }
+    stage('Test') {
+      steps {
+        dir('tests'){
+          sh 'sudo -E python3 tests.py'
+        }
+      }
+    }
   }
   post {
     success {
       archiveArtifacts artifacts: 'deploy/*', fingerprint: true
-    }
-    failure {
-      echo 'Failure!'
-    }
-    unstable {
-      echo 'Unstable'
     }
   }
 }
