@@ -17,15 +17,11 @@ pipeline {
         sh 'sudo CLEAN=1 ./build.sh'
       }
     }
-    stage('Stage') {
+    stage('Flash') {
       steps {
-        sh "sudo sshpass -p loragateway ssh pi@$WAZIGATE_IP \\'sudo reboot now\\'"
-      }
-    }
-    stage('Test') {
-      steps {
-        dir('tests'){
-          sh 'sudo -E python3 tests.py'
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          // Flash to a SD card connected on /dev/sda
+          sh "zcat deploy/image_nightly-WaziGate.zip | sudo dd bs=4M of=/dev/sda conv=sync"
         }
       }
     }
