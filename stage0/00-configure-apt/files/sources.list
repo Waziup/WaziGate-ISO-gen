@@ -1,3 +1,6 @@
 deb http://raspbian.raspberrypi.org/raspbian/ RELEASE main contrib non-free rpi
 # Uncomment line below then 'apt-get update' to enable 'apt-get source'
 #deb-src http://raspbian.raspberrypi.org/raspbian/ RELEASE main contrib non-free rpi
+
+# mongodb was removed from bullseye, so we add the legacy source here
+deb http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi
