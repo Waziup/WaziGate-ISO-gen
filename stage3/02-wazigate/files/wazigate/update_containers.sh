@@ -18,7 +18,7 @@ docker run -d --restart=always --network=wazigate --name wazigate-edge \
 docker rm -f waziup.wazigate-system
 docker image rm waziup/wazigate-system:$WAZIGATE_TAG
 docker run -d --restart=unless-stopped --network=host --name waziup.wazigate-system \
-  -v "$PWD/apps/waziup.wazigate-system:/var/lib/waziapp" \
+  -v "/var/lib/wazigate/apps/waziup.wazigate-system:/var/lib/waziapp" \
   -v "/var/run:/var/run" \
   -v "/sys/class/gpio:/sys/class/gpio" \
   -v "/dev/mem:/dev/mem" \
@@ -30,7 +30,7 @@ docker run -d --restart=unless-stopped --network=host --name waziup.wazigate-sys
 docker rm -f waziup.wazigate-lora
 docker image rm waziup/wazigate-lora:$WAZIGATE_TAG
 docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate-lora \
-  -v "$PWD/apps/waziup.wazigate-lora:/var/lib/waziapp" \
+  -v "/var/lib/wazigate/apps/waziup.wazigate-lora:/var/lib/waziapp" \
   --health-cmd="curl --fail --unix-socket /var/lib/waziapp/proxy.sock http://localhost/ || exit 1" \
   --health-interval=10s \
   --label "io.waziup.waziapp=waziup.wazigate-lora" \
