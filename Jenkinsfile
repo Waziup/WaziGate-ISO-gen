@@ -1,18 +1,17 @@
 pipeline {
   agent any
+  environment {
+    IMG_NAME              = 'WaziGate'
+    IMG_DATE              = 'nightly'
+    ENABLE_SSH            = '1'
+    FIRST_USER_PASS       = 'loragateway'
+    TARGET_HOSTNAME       = 'wazigate'
+    PI_GEN_REPO           = 'https://github.com/Waziup/WaziGate-ISO-gen'
+    TARGET_HOSTNAME       = 'wazigate'
+    DEPLOY_ZIP            = '0'
+    PUBKEY_SSH_FIRST_USER = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDIZzWQBgz9npw6at5EeVIBmtG3KsXRSfJogg7PECEIMQUaxgSVXeXEbSyzxZbzSqHWBoFJb1rJV7QyE4LAn7fOpFlpNDc+Fbh0SBGaV1IqKfRBJ09u2LQKhLUxMvy5MZuvmfjmufnv7GbWwjxt2BbUiXu4czQ1Y5kyt07otk7DTYXHflB08qtnR82mKtloODWdbkjenRmQaRNnuwy5ZfXb3PH3V6TdC1YzZhgaZyu6yPnSz68ks+RjA6ID67j1NS2NV+Sxnk5S1TqXP/PHsgQDUVUZNfm7xi/mhdltrwSNv57j2wrdNwXQGc05G2wJHU/+9SdBO1LObckw8WtRujznmU8MsylNLOJJVMOXxq65TNJYqfIv6TYPTV/7f6JBe2khLJ79zX6vv94b/i25Zxloc31mabT+/tqMttOpnjUYn6EGqAAbKiIWE0oJhlzcgPQKT1JkaqAzMU2UCLU1dkgJytYmzo55xek//SfMhH2C9/VPYqhBi7eS7KjWjTkMy+0= jenkins@cdupont-server'
+  }
   stages {
-    stage('Prepare') {
-      steps {
-        sh 'echo "IMG_NAME=WaziGate" > config'
-        sh 'echo "IMG_DATE=nightly" >> config'
-        sh 'echo "ENABLE_SSH=1" >> config'
-        sh 'echo "FIRST_USER_PASS=loragateway" >> config'
-        sh 'echo "TARGET_HOSTNAME=wazigate" >> config'
-        sh 'echo "PI_GEN_REPO=https://github.com/Waziup/WaziGate-ISO-gen" >> config'
-        sh 'echo "TARGET_HOSTNAME=wazigate" >> config'
-        sh 'echo "DEPLOY_ZIP=0" >> config'
-      }
-    }
     stage('Build') {
       steps {
         sh 'sudo CLEAN=1 ./build.sh'
