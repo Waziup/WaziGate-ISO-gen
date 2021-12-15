@@ -1,0 +1,24 @@
+[Unit]
+Description=An object/document-oriented database
+Documentation=man:mongod(1)
+
+[Service]
+User=mongodb
+ExecStart=/usr/bin/mongod --config /etc/mongodb.conf
+# Recommended ulimits (https://docs.mongodb.com/manual/reference/ulimit/#linux-distributions-using-systemd)
+# (file size)
+LimitFSIZE=infinity
+# (cpu time)
+LimitCPU=infinity
+# (virtual memory size)
+LimitAS=infinity
+# (locked-in-memory size)
+LimitMEMLOCK=infinity
+# (open files)
+LimitNOFILE=64000
+# (processes/threads)
+LimitNPROC=64000
+
+[Install]
+WantedBy=multi-user.target
+
