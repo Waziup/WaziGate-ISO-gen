@@ -50,7 +50,7 @@ fi
 log 3 "Configuring Access Point"
 
 # Create Access Point (if not exists)
-if [! -f /etc/NetworkManager/system-connections/WAZIGATE_AP.nmconnection]; then
+if [ ! -f /etc/NetworkManager/system-connections/WAZIGATE_AP.nmconnection ]; then
   nmcli dev wifi hotspot ifname wlan0 con-name WAZIGATE-AP ssid $SSID password "loragateway"
   nmcli connection modify WAZIGATE-AP \
     connection.autoconnect true connection.autoconnect-priority -100 \
