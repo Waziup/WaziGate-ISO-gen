@@ -4,7 +4,7 @@ This tool will create Wazigate ISO images for Raspberry Pi. It is based on the [
 
 In stage 3 we will install WaziGate components on the image. WaziApps are base on Docker images, so you will also need to install [Docker](https://docs.docker.com/get-docker/) on your machine. The scripts will use Docker to pull some images from the Docker hub and place them inside the new OS. Stage 3 is the final stage, graphical stages are removed. The Wazigate library will be installed at `/var/lib/wazigate/`.
 
-## Config
+## Build
 
 The configuration is essentially the same as pi-gen. Here is a set of recommended values for the `config` file:
 ```
