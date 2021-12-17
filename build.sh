@@ -264,7 +264,9 @@ fi
 
 export NO_PRERUN_QCOW2="${NO_PRERUN_QCOW2:-1}"
 
-export WAZIGATE_TAG
+export WAZIGATE_TAG="${WAZIGATE_TAG:-latest}"
+
+export WAZIGATE_VERSION
 
 dependencies_check "${BASE_DIR}/depends"
 
