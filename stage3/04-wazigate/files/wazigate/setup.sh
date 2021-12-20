@@ -4,6 +4,8 @@ log () {
   echo "Step $1/13: $2" > /tmp/wazigate-setup-step.txt
 }
 
+source .env
+
 
 ################################################################################
 
@@ -19,9 +21,6 @@ fi;
 WAZIGATE_ID=${WAZIGATE_ID//:}
 
 SSID="WAZIGATE_${WAZIGATE_ID^^}"
-sed -i "s/^ssid.*/ssid=$SSID/g" /etc/hostapd/hostapd.conf
-
-source .env
 
 
 ################################################################################
