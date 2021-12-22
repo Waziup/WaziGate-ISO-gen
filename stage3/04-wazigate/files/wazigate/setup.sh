@@ -79,7 +79,7 @@ fi
 
 log 5 "Creating Wazigate-Edge app"
 
-if ! docker image inspect waziup/wazigate-edge --format {{.Id}} > /dev/null; then
+if ! docker image inspect waziup/wazigate-edge:$WAZIGATE_TAG --format {{.Id}} > /dev/null; then
   echo "Creating container 'wazigate-edge' (Wazigate Edge) ..."
   # docker image save waziup/wazigate-edge -o wazigate-edge.tar
   docker image load -i wazigate-edge.tar
@@ -100,7 +100,7 @@ fi
 
 log 6 "Creating Wazigate-System app"
 
-if ! docker image inspect waziup/wazigate-system --format {{.Id}} > /dev/null; then
+if ! docker image inspect waziup/wazigate-system:$WAZIGATE_TAG --format {{.Id}} > /dev/null; then
   echo "Creating container 'wazigate-system' (Wazigate System) ..."
   # docker image save waziup/wazigate-system -o wazigate-system.tar
   docker image load -i wazigate-system.tar
@@ -118,7 +118,7 @@ fi
 
 ################################################################################
 
-if ! docker image inspect waziup/wazigate-lora --format {{.Id}} > /dev/null; then
+if ! docker image inspect waziup/wazigate-lora:$WAZIGATE_TAG --format {{.Id}} > /dev/null; then
   docker volume create postgresqldata
   docker volume create redisdata
 
