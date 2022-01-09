@@ -1,9 +1,20 @@
 #!/bin/bash
 set -x
 
-docker rm -f wazigate-edge
+if [ -f  /sys/class/net/eth0/address ] ; then
+  WAZIGATE_ID=$(cat /sys/class/net/eth0/address)
+else
+  if [ -f  /sys/class/net/wlan0/address ] ; then
+    WAZIGATE_ID=$(cat /sys/class/net/wlan0/address)
+  fi;
+fi;
+WAZIGATE_ID=${WAZIGATE_ID//:}
+
+SSID="WAZIGATE_${WAZIGATE_ID^^}"
+
+docker rm -f waziup.wazigate-edge
 docker image rm waziup/wazigate-edge:$WAZIGATE_TAG
-docker run -d --restart=always --network=wazigate --name wazigate-edge \
+docker run -d --restart=always --network=wazigate --name waziup.wazigate-edge \
   -e "WAZIGATE_ID=$WAZIGATE_ID" \
   -e "WAZIGATE_VERSION=$WAZIGATE_VERSION" \
   -e "WAZIGATE_TAG=$WAZIGATE_TAG" \
@@ -35,3 +46,56 @@ docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate
   --health-interval=10s \
   --label "io.waziup.waziapp=waziup.wazigate-lora" \
   waziup/wazigate-lora:$WAZIGATE_TAG
+
+
+docker rm -f waziup.wazigate-lora.forwarders
+docker run -d --restart=unless-stopped --network=wazigate --name "waziup.wazigate-lora.forwarders" \
+  -v "$PWD/apps/waziup.wazigate-lora/forwarders/:/root/conf" \
+  -v "/var/run/dbus:/var/run/dbus" \
+  -v "/sys/class/gpio:/sys/class/gpio" \
+  -v "/dev:/dev" \
+  -e "ENABLE_MULTI_SPI=1" \
+  -e "ENABLE_MULTI_USB=1" \
+  -e "ENABLE_SINGLE_SPI=1" \
+  --device "/dev/ttyACM0:/dev/ttyACM0" \
+  --privileged \
+  --tty \
+  --label "io.waziup.waziapp=waziup.wazigate-lora" \
+  waziup/wazigate-lora-forwarders
+
+
+docker rm -f redis 
+docker run -d --restart=unless-stopped --network=wazigate --name redis \
+  -v "redisdata:/data" \
+  redis:6-alpine --appendonly yes --maxmemory 100mb --tcp-backlog 128
+
+
+docker rm -f postgresql 
+docker run -d --restart=unless-stopped --network=wazigate --name postgresql \
+  -v "$PWD/apps/waziup.wazigate-lora/postgresql/initdb:/docker-entrypoint-initdb.d" \
+  -v "postgresqldata:/var/lib/postgresql/data" \
+  -e "POSTGRES_HOST_AUTH_METHOD=trust" \
+  waziup/wazigate-postgresql
+
+docker rm -f waziup.wazigate-lora.chirpstack-gateway-bridge
+docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate-lora.chirpstack-gateway-bridge \
+  -v "$PWD/apps/waziup.wazigate-lora/chirpstack-gateway-bridge:/etc/chirpstack-gateway-bridge" \
+  -p "1700:1700/udp" \
+  --label "io.waziup.waziapp=waziup.wazigate-lora" \
+  waziup/chirpstack-gateway-bridge:3.9.2
+
+docker rm -f waziup.wazigate-lora.chirpstack-application-server
+docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate-lora.chirpstack-application-server \
+  -v "$PWD/apps/waziup.wazigate-lora/chirpstack-application-server:/etc/chirpstack-application-server" \
+  -p "8080:8080" \
+  --label "io.waziup.waziapp=waziup.wazigate-lora" \
+  waziup/chirpstack-application-server:3.13.2
+
+
+docker rm -f waziup.wazigate-lora.chirpstack-network-server
+docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate-lora.chirpstack-network-server \
+  -v "$PWD/apps/waziup.wazigate-lora/chirpstack-network-server:/etc/chirpstack-network-server" \
+  --label "io.waziup.waziapp=waziup.wazigate-lora" \
+  waziup/chirpstack-network-server:3.11.0
+
+

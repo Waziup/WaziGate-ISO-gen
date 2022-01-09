@@ -84,7 +84,7 @@ if ! docker image inspect waziup/wazigate-edge:$WAZIGATE_TAG --format {{.Id}} > 
   # docker image save waziup/wazigate-edge -o wazigate-edge.tar
   docker image load -i wazigate-edge.tar
   rm wazigate-edge.tar
-  docker run -d --restart=always --network=wazigate --name wazigate-edge \
+  docker run -d --restart=always --network=wazigate --name waziup.wazigate-edge \
     -e "WAZIGATE_ID=$WAZIGATE_ID" \
     -e "WAZIGATE_VERSION=$WAZIGATE_VERSION" \
     -e "WAZIGATE_TAG=$WAZIGATE_TAG" \
