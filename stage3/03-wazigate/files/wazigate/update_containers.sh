@@ -12,6 +12,15 @@ WAZIGATE_ID=${WAZIGATE_ID//:}
 
 SSID="WAZIGATE_${WAZIGATE_ID^^}"
 
+docker rm -f waziup.wazigate-mongo
+docker image rm waziup/wazigate-mongo:4.4.11
+docker run -d --restart=always --network=wazigate --name waziup.wazigate-mongo \
+  -v "$PWD/wazigate-mongo/data:/data/db" \
+  --health-cmd="echo 'db.stats().ok' | mongo localhost:27017/local --quiet" \
+  --health-interval=10s \
+  --entrypoint="mongod" \
+  waziup/wazigate-mongo:4.4.11 --bind_ip_all
+
 docker rm -f waziup.wazigate-edge
 docker image rm waziup/wazigate-edge:64_v2
 docker run -d --restart=always --network=wazigate --name waziup.wazigate-edge \
