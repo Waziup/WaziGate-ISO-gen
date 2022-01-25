@@ -60,26 +60,22 @@ if [ ! -f /etc/NetworkManager/system-connections/WAZIGATE_AP.nmconnection ]; the
   nmcli c up WAZIGATE-AP
 fi
 
-# if ! docker image inspect webhippie/mongodb --format {{.Id}} > /dev/null; then
-#   echo "Creating container 'wazigate-mongo' (MongoDB) ..."
-#   # docker image save webhippie/mongodb -o wazigate-mongo.tar
-#   docker image load -i wazigate-mongo.tar
-#   docker run -d --restart=always --network=wazigate --name wazigate-mongo \
-#     -p "27017:27017" \
-#     -v "$PWD/wazigate-mongo/data:/var/lib/mongodb" \
-#     -v "$PWD/wazigate-mongo/backup:/var/lib/backup" \
-#     -v "$PWD/wazigate-mongo/bin:/var/lib/bin" \
-#     --health-cmd="echo 'db.stats().ok' | mongo localhost:27017/local --quiet" \
-#     --health-interval=10s \
-#     --entrypoint="sh" \
-#     webhippie/mongodb \
-#     /var/lib/bin/entrypoint.sh
-# fi
-
+if ! docker image inspect waziup/wazigate-mongo:4.4.11 --format {{.Id}} > /dev/null; then
+  echo "Creating container 'wazigate-mongo' (MongoDB) ..."
+  # docker image save webhippie/mongodb -o wazigate-mongo.tar
+  docker image load -i wazigate-mongo.tar
+  docker run -d --restart=always --network=wazigate --name waziup.wazigate-mongo \
+    -v "$PWD/wazigate-mongo/data:/data/db" \
+    --health-cmd="echo 'db.stats().ok' | mongo localhost:27017/local --quiet" \
+    --health-interval=10s \
+    --entrypoint="mongod" \
+    waziup/wazigate-mongo:4.4.11 --bind_ip_all
+fi
+    #-p "27017:27017" \ # just added
 
 log 5 "Creating Wazigate-Edge app"
 
-if ! docker image inspect waziup/wazigate-edge:$WAZIGATE_TAG --format {{.Id}} > /dev/null; then
+if ! docker image inspect waziup/wazigate-edge:64_v2 --format {{.Id}} > /dev/null; then
   echo "Creating container 'wazigate-edge' (Wazigate Edge) ..."
   # docker image save waziup/wazigate-edge -o wazigate-edge.tar
   docker image load -i wazigate-edge.tar
@@ -87,14 +83,13 @@ if ! docker image inspect waziup/wazigate-edge:$WAZIGATE_TAG --format {{.Id}} > 
   docker run -d --restart=always --network=wazigate --name waziup.wazigate-edge \
     -e "WAZIGATE_ID=$WAZIGATE_ID" \
     -e "WAZIGATE_VERSION=$WAZIGATE_VERSION" \
-    -e "WAZIGATE_TAG=$WAZIGATE_TAG" \
-    -e "WAZIUP_MONGO=unix:///tmp/mongodb-27017.sock" \
+    -e "WAZIGATE_TAG=64_v2" \
+    -e "WAZIUP_MONGO=waziup.wazigate-mongo:27017" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
-    -v "/tmp/mongodb-27017.sock:/tmp/mongodb-27017.sock" \
     -v "/var/run/wazigate-host.sock:/var/run/wazigate-host.sock" \
     -v "$PWD/apps:/root/apps" \
     -p "80:80" -p "1883:1883" \
-    waziup/wazigate-edge:$WAZIGATE_TAG
+    waziup/wazigate-edge:64_v2
 fi
 
 
@@ -139,7 +134,7 @@ if ! docker image inspect waziup/wazigate-lora:$WAZIGATE_TAG --format {{.Id}} > 
     --privileged \
     --tty \
     --label "io.waziup.waziapp=waziup.wazigate-lora" \
-    waziup/wazigate-lora-forwarders
+    waziup/wazigate-lora-forwarders:latest
 
 
   log 8 "Creating Wazigate-LoRa Redis app"
@@ -161,7 +156,7 @@ if ! docker image inspect waziup/wazigate-lora:$WAZIGATE_TAG --format {{.Id}} > 
     -v "$PWD/apps/waziup.wazigate-lora/postgresql/initdb:/docker-entrypoint-initdb.d" \
     -v "postgresqldata:/var/lib/postgresql/data" \
     -e "POSTGRES_HOST_AUTH_METHOD=trust" \
-    waziup/wazigate-postgresql
+    postgres:alpine3.15
 
 
   log 10 "Creating Wazigate-LoRa ChirptStack Gateway Bridge app"
@@ -173,7 +168,7 @@ if ! docker image inspect waziup/wazigate-lora:$WAZIGATE_TAG --format {{.Id}} > 
     -v "$PWD/apps/waziup.wazigate-lora/chirpstack-gateway-bridge:/etc/chirpstack-gateway-bridge" \
     -p "1700:1700/udp" \
     --label "io.waziup.waziapp=waziup.wazigate-lora" \
-    waziup/chirpstack-gateway-bridge:3.9.2
+    chirpstack/chirpstack-gateway-bridge:3.13.2
 
 
   log 11 "Creating Wazigate-LoRa ChirptStack Application Server app"
@@ -185,7 +180,7 @@ if ! docker image inspect waziup/wazigate-lora:$WAZIGATE_TAG --format {{.Id}} > 
     -v "$PWD/apps/waziup.wazigate-lora/chirpstack-application-server:/etc/chirpstack-application-server" \
     -p "8080:8080" \
     --label "io.waziup.waziapp=waziup.wazigate-lora" \
-    waziup/chirpstack-application-server:3.13.2
+    chirpstack/chirpstack-application-server:3.17.4
 
 
   log 12 "Creating Wazigate-LoRa ChirptStack Network Server app"
@@ -196,7 +191,7 @@ if ! docker image inspect waziup/wazigate-lora:$WAZIGATE_TAG --format {{.Id}} > 
   docker run -d --restart=unless-stopped --network=wazigate --name waziup.wazigate-lora.chirpstack-network-server \
     -v "$PWD/apps/waziup.wazigate-lora/chirpstack-network-server:/etc/chirpstack-network-server" \
     --label "io.waziup.waziapp=waziup.wazigate-lora" \
-    waziup/chirpstack-network-server:3.11.0
+    chirpstack/chirpstack-network-server:3.15.5
 
 
   log 13 "Creating Wazigate-LoRa app"

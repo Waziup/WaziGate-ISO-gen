@@ -58,27 +58,27 @@ function install_docker_image {
   if [ -f "files/$1.tar" ]; then
     echo "Using $1 docker image from $1.tar"
   else
-    echo "Pulling $2 from docker hub ..."
-    docker pull --platform linux/arm/v7 $2
-    docker image save $2 -o files/$1.tar
+    echo "Pulling $3 from docker hub ..."
+    docker pull --platform $2 $3
+    docker image save $3 -o files/$1.tar
   fi
 
   # Copy Docker Images
   install -m 644 files/$1.tar "$WAZIGATE_DIR/"
 }
 # WaziGate Core (WaziGate-Edge and MongoDB)
-# install_docker_image "wazigate-mongo" "webhippie/mongodb:latest"
-install_docker_image "wazigate-edge" "waziup/wazigate-edge:$WAZIGATE_TAG"
+install_docker_image "wazigate-mongo" "linux/arm64" "waziup/wazigate-mongo:4.4.11"
+install_docker_image "wazigate-edge" "linux/arm64" "waziup/wazigate-edge:64_v2"
 # WaziGate-System App
-install_docker_image "wazigate-system" "waziup/wazigate-system:$WAZIGATE_TAG"
+install_docker_image "wazigate-system" "linux/arm/v7" "waziup/wazigate-system:$WAZIGATE_TAG"
 # WaziGate-LoRa App
-install_docker_image "wazigate-lora" "waziup/wazigate-lora:$WAZIGATE_TAG"
-install_docker_image "chirpstack-network-server" "waziup/chirpstack-network-server:3.11.0"
-install_docker_image "chirpstack-application-server" "waziup/chirpstack-application-server:3.13.2"
-install_docker_image "chirpstack-gateway-bridge" "waziup/chirpstack-gateway-bridge:3.9.2"
-install_docker_image "postgresql" "waziup/wazigate-postgresql"
-install_docker_image "redis" "redis:6-alpine"
-install_docker_image "wazigate-lora-forwarders" "waziup/wazigate-lora-forwarders"
+install_docker_image "wazigate-lora" "linux/arm/v7" "waziup/wazigate-lora:$WAZIGATE_TAG"
+install_docker_image "chirpstack-network-server" "linux/arm64" "chirpstack/chirpstack-network-server:3.15.5"
+install_docker_image "chirpstack-application-server" "linux/arm64" "chirpstack/chirpstack-application-server:3.17.4"
+install_docker_image "chirpstack-gateway-bridge" "linux/arm64" "chirpstack/chirpstack-gateway-bridge:3.13.2"
+install_docker_image "postgresql" "linux/arm64/v8" "postgres:alpine3.15"
+install_docker_image "redis" "linux/arm64/v8" "redis:6-alpine"
+install_docker_image "wazigate-lora-forwarders" "linux/arm/v7" "waziup/wazigate-lora-forwarders:latest"
 
 ################################################################################
 
