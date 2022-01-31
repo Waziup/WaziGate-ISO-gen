@@ -39,7 +39,7 @@ curl -fsSL "$DOWNLOAD_URL/linux/$lsb_dist/gpg" | gpg --dearmor --yes -o "$ROOTFS
 
 echo \
   "deb [arch=arm64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/$lsb_dist \
-  $dist_version stable" | sudo tee $ROOTFS_DIR/etc/apt/sources.list.d/docker.list > /dev/null
+  $dist_version stable" | sudo tee "$ROOTFS_DIR/etc/apt/sources.list.d/docker.list" > /dev/null
 
 
 on_chroot <<EOF
@@ -48,5 +48,12 @@ apt-get install -y -qq --no-install-recommends docker-ce
 adduser "$FIRST_USER_NAME" docker
 EOF
 
-mkdir -p "${ROOTFS_DIR}/etc/docker"
-install -m 644 files/daemon.json "${ROOTFS_DIR}/etc/docker/daemon.json"
+mkdir -p "$ROOTFS_DIR/etc/docker"
+install -m 644 files/daemon.json "$ROOTFS_DIR/etc/docker/daemon.json"
+
+
+# Install docker-compose
+
+curl -L "https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-aarch64" -o $ROOTFS_DIR/usr/local/bin/docker-compose
+
+chmod +x "$ROOTFS_DIR/usr/local/bin/docker-compose"
