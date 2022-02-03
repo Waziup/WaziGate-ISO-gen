@@ -1,0 +1,155 @@
+version: "3.9"
+
+services:
+  wazigate-mongo:
+    container_name: waziup.wazigate-mongo
+    image: waziup/wazigate-mongo:4.4.11
+    volumes:
+      - $PWD/wazigate-mongo/data:/data/db
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/local --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: always
+    entrypoint: ["mongod", "--bind_ip_all"]
+
+  wazigate-edge:
+    container_name: waziup.wazigate-edge
+    image: waziup/wazigate-edge:64_v2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/wazigate-host.sock:/var/run/wazigate-host.sock
+      - $PWD/apps:/root/apps"
+    environment:
+      - WAZIGATE_ID=$WAZIGATE_ID
+      - WAZIGATE_VERSION=$WAZIGATE_VERSION
+      - WAZIGATE_TAG=64_v2
+      - WAZIUP_MONGO=mongodb://waziup.wazigate-mongo:27017/?connect=direct
+    ports:
+      - "80:80"
+      - "1883:1883"
+    restart: always
+
+  wazigate-system:
+    container_name: waziup.wazigate-system
+    image: waziup/wazigate-system:$WAZIGATE_TAG
+    volumes:
+      - $PWD/apps/waziup.wazigate-system:/var/lib/waziapp
+      - /var/run:/var/run
+      - /sys/class/gpio:/sys/class/gpio
+      - /dev/mem:/dev/mem
+      - /var/run/wazigate-host.sock:/var/run/wazigate-host.sock
+    privileged: true
+    healthcheck:
+      test: curl --fail --unix-socket /var/lib/waziapp/proxy.sock http://localhost/ || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 30 # Will try for 5 minutes
+    restart: unless-stopped
+
+  wazigate-lora-forwarders:
+    container_name: waziup.wazigate-lora.forwarders
+    image: waziup/wazigate-lora-forwarders:latest
+    tty: true 
+    volumes:
+      - $PWD/apps/waziup.wazigate-lora/forwarders/:/root/conf
+      - /var/run/dbus:/var/run/dbus
+      - /sys/class/gpio:/sys/class/gpio
+      - /dev:/dev
+    environment:
+      - ENABLE_MULTI_SPI=1
+      - ENABLE_MULTI_USB=1
+      - ENABLE_SINGLE_SPI=1
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+    labels:
+      - io.waziup.waziapp=waziup.wazigate-lora
+    privileged: true  
+    restart: unless-stopped
+
+  redis:
+    container_name: redis
+    image: redis:6-alpine
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30   
+    restart: unless-stopped
+    entrypoint: ["redis-server", "--appendonly yes", "--maxmemory 100mb", "--tcp-backlog 128"]
+
+  postgresql:
+    container_name: postgres
+    image: postgres:alpine3.15
+    volumes:
+      - $PWD/apps/waziup.wazigate-lora/postgresql/initdb:/docker-entrypoint-initdb.d
+      - postgresqldata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "chirpstack_ns"]
+      interval: 10s
+      timeout: 5s
+      retries: 5  
+    restart: unless-stopped
+
+  chirpstack-gateway-bridge:
+    container_name: waziup.wazigate-lora.chirpstack-gateway-bridge
+    image: waziup/chirpstack-gateway-bridge:3.9.2 #chirpstack/chirpstack-gateway-bridge:3.13.2
+    labels: 
+      - io.waziup.waziapp=waziup.wazigate-lora
+    volumes:
+      - $PWD/apps/waziup.wazigate-lora/chirpstack-gateway-bridge:/etc/chirpstack-gateway-bridge
+    ports:
+      - 1700:1700/udp
+    restart: unless-stopped
+
+  chirpstack-application-server:
+    container_name: waziup.wazigate-lora.chirpstack-application-server
+    image: waziup/chirpstack-application-server:3.13.2 #chirpstack/chirpstack-application-server:3.17.4 
+    labels: 
+      - io.waziup.waziapp=waziup.wazigate-lora
+    volumes:
+      - $PWD/apps/waziup.wazigate-lora/chirpstack-application-server:/etc/chirpstack-application-server
+    ports:
+      - 8080:8080 
+    restart: unless-stopped
+
+  chirpstack-network-server:
+    container_name: waziup.wazigate-lora.chirpstack-network-server
+    image: waziup/chirpstack-network-server:3.11.0 #chirpstack/chirpstack-network-server:3.15.5
+    labels:
+      - io.waziup.waziapp=waziup.wazigate-lora
+    volumes:
+      - $PWD/apps/waziup.wazigate-lora/chirpstack-network-server:/etc/chirpstack-network-server
+    restart: unless-stopped
+
+  wazigate-lora:
+    container_name: waziup.wazigate-lora
+    image: waziup/wazigate-lora:$WAZIGATE_TAG
+    labels: 
+      - io.waziup.waziapp=waziup.wazigate-lora
+    volumes:
+      - $PWD/apps/waziup.wazigate-lora:/var/lib/waziapp
+    healthcheck:
+      test: curl --fail --unix-socket /var/lib/waziapp/proxy.sock http://localhost/ || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 30 # Will try for 5 minutes      
+    restart: unless-stopped
+
+
+#-------------------------#
+
+networks:
+  default:
+    name: wazigate
+
+volumes:
+  postgresqldata:
+    name: postgresqldata
+  redisdata:
+    name: redisdata
