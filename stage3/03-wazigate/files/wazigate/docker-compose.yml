@@ -38,8 +38,8 @@ services:
 
   wazigate-lora-forwarders:
     container_name: waziup.wazigate-lora.forwarders
-    image: waziup/wazigate-lora-forwarders:latest
-    platform: linux/arm/v7
+    image: waziup/wazigate-lora-forwarders:$WAZIGATE_TAG
+    platform: linux/arm64
     tty: true 
     volumes:
       - ./apps/waziup.wazigate-lora/forwarders/:/root/conf
