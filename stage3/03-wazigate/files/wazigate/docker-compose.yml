@@ -1,20 +1,6 @@
 version: "3.9"
 
 services:
-  wazigate-mongo:
-    container_name: waziup.wazigate-mongo
-    image: waziup/wazigate-mongo:4.4.11
-    platform: linux/arm64
-    volumes:
-      - ./wazigate-mongo/data:/data/db
-    healthcheck:
-      test: echo 'db.stats().ok' | mongo localhost:27017/local --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 12
-    restart: always
-    entrypoint: ["mongod", "--bind_ip_all"]
-
   wazigate-edge:
     container_name: waziup.wazigate-edge
     image: waziup/wazigate-edge:64_v2
@@ -70,7 +56,21 @@ services:
       - io.waziup.waziapp=waziup.wazigate-lora
     privileged: true  
     restart: unless-stopped
-
+    
+  wazigate-mongo:
+    container_name: waziup.wazigate-mongo
+    image: waziup/wazigate-mongo:4.4.11
+    platform: linux/arm64
+    volumes:
+      - ./wazigate-mongo/data:/data/db
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/local --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: always
+    entrypoint: ["mongod", "--bind_ip_all"]
+  
   redis:
     container_name: redis
     image: redis:6-alpine
