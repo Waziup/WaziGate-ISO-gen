@@ -48,8 +48,7 @@ if [ "${CLEAN}" = "1" ]; then
   rm -rf files/*.tar
 fi
 
-function install_docker_image {
-
+function save_docker_image {
   # Cleaning existing image
   if [ "${CLEAN}" = "1" ] && [ -f "files/$1.tar" ]; then
     rm -f "files/$1.tar";
@@ -58,27 +57,46 @@ function install_docker_image {
   if [ -f "files/$1.tar" ]; then
     echo "Using $1 docker image from $1.tar"
   else
-    echo "Pulling $3 from docker hub ..."
-    docker pull --platform $2 $3
-    docker image save $3 -o files/$1.tar
+    echo "Saving $2 to files/$1.tar ..."
+    docker image save ${2%:*} -o files/$1.tar
+    #sudo chmod 644 files/$1.tar # For debug
   fi
 
   # Copy Docker Images
   install -m 644 files/$1.tar "$WAZIGATE_DIR/"
 }
-# WaziGate Core (WaziGate-Edge and MongoDB)
-install_docker_image "wazigate-mongo" "linux/arm64" "waziup/wazigate-mongo:4.4.11"
-install_docker_image "wazigate-edge" "linux/arm64" "waziup/wazigate-edge:64_v2"
-# WaziGate-System App
-install_docker_image "wazigate-system" "linux/arm/v7" "waziup/wazigate-system:$WAZIGATE_TAG"
-# WaziGate-LoRa App
-install_docker_image "wazigate-lora" "linux/arm/v7" "waziup/wazigate-lora:$WAZIGATE_TAG"
-install_docker_image "chirpstack-network-server" "linux/arm64" "waziup/chirpstack-network-server:3.11.0"
-install_docker_image "chirpstack-application-server" "linux/arm64" "waziup/chirpstack-application-server:3.13.2"
-install_docker_image "chirpstack-gateway-bridge" "linux/arm64" "waziup/chirpstack-gateway-bridge:3.9.2"
-install_docker_image "postgresql" "linux/arm64/v8" "postgres:alpine3.15"
-install_docker_image "redis" "linux/arm64/v8" "redis:6-alpine"
-install_docker_image "wazigate-lora-forwarders" "linux/arm/v7" "waziup/wazigate-lora-forwarders:latest"
+
+function read_from_compose {
+    # have to add a path
+    declare -a IFS=$'' image_names=($(grep '^\s*image' docker-compose.yml | sed 's/image://'))
+    #declare -a IFS=$' ' platform=($(grep '^\s*platform' docker-compose.yml | sed 's/platform://')) # use yq instead
+
+    i=0
+    # docker pull all images at once via docker-compose file
+    docker-compose -f files/wazigate/docker-compose.yml pull
+
+    for single_elemet in "${image_names[@]}"
+    do
+        full_name=$single_elemet
+        # Delete tags
+        striped_elemet=${single_elemet%:*}
+        # Delete before "/"
+        striped_elemet=${striped_elemet#*/}
+
+        echo "Step: $i" "$striped_elemet" "$full_name" #"${platform[$i]}"
+        save_docker_image "$striped_elemet" "$full_name"
+
+        let "i += 1"
+    done
+}
+
+# docker rm -f $(docker ps -q)
+# docker image rm -f $(docker image ls -q)
+# docker-compose pull
+# docker image save -o "./wazigate-images_fe.tar" $(docker image ls -q)
+
+
+read_from_compose
 
 ################################################################################
 

@@ -1,12 +1,12 @@
 #!/bin/bash -e
 
 log () {
-  echo "Step $1/12: $2" > /tmp/wazigate-setup-step.txt
+  echo "Step $1/3: $2" > /tmp/wazigate-setup-step.txt
 }
 
 loadNRun () {
-  # delete file ending
-  name=${1%.*}
+  ending=".tar"
+  filename="$1$ending"
 
   # For debugging
   ########################################
@@ -14,14 +14,28 @@ loadNRun () {
   #docker rm -f "waziup.$name"
   ########################################
 
-  if [ -f $1 ]; then
-    echo "Creating container $name"
-    docker image load -i $1
-    rm $1
-    docker-compose up -d $name
+  if [ -f $filename ]; then
+    echo "Creating container $1 from file: $filename"
+    docker image load -i $filename
+    rm $filename
+    #docker-compose up -d $name # Now we can use docker-compose file
   else 
-      echo "Compressed file $1, of Container $name does not exist"
+    echo "Compressed file $filename, of Container $1 does not exist"
   fi
+}
+
+readImageNames () {
+  declare -a IFS=$'' image_names=($(grep '^\s*image' docker-compose.yml | sed 's/image://'))
+
+  for single_elemet in "${image_names[@]}"
+  do
+    # Delete tags
+    striped_elemet=${single_elemet%:*}
+    # Delete before "/"
+    striped_elemet=${striped_elemet#*/}
+
+    loadNRun "$striped_elemet"
+  done
 }
 
 source .env
@@ -38,6 +52,8 @@ else
   fi;
 fi;
 export WAZIGATE_ID=${WAZIGATE_ID//:}
+
+sed -i "s/^WAZIGATE_ID.*/WAZIGATE_ID=$WAZIGATE_ID/g" .env
 
 SSID="WAZIGATE_${WAZIGATE_ID^^}"
 
@@ -57,6 +73,9 @@ raspi-config nonint do_i2c 0
 log 2 "Configuring Access Point"
 
 # Create Access Point (if not exists)
+currentFullID=$(nmcli c show WAZIGATE-AP | grep "802-11-wireless.ssid" | sed 's/802-11-wireless.ssid://')
+currentMAC=${currentFullID#*_}
+
 if [ ! -f /etc/NetworkManager/system-connections/WAZIGATE_AP.nmconnection ]; then
   nmcli dev wifi hotspot ifname wlan0 con-name WAZIGATE-AP ssid $SSID password "loragateway"
   nmcli connection modify WAZIGATE-AP \
@@ -66,36 +85,21 @@ if [ ! -f /etc/NetworkManager/system-connections/WAZIGATE_AP.nmconnection ]; the
   # using down/up instead of reapply because '802-11-wireless.band' can not be changed on the fly
   nmcli c down WAZIGATE-AP
   nmcli c up WAZIGATE-AP
+elif [ $currentFullID =~ WAZIGATE_[A-Z0-9]{12}$ ]; then #johann
+  nmcli connection modify WAZIGATE-AP \
+    connection.autoconnect true connection.autoconnect-priority -100 \
+    802-11-wireless.ssid=$SSID
+elif [ "currentMAC" != "${SSID#*_}"]; then #felix
+  nmcli connection modify WAZIGATE-AP \
+    connection.autoconnect true connection.autoconnect-priority -100 \
+    802-11-wireless.ssid=$SSID
 fi
-
-log 3 "Creating Wazigate-Mongo app"
-loadNRun "wazigate-mongo.tar"
-
-log 4 "Creating Wazigate-Edge app"
-loadNRun "wazigate-edge.tar"
-
-log 5 "Creating Wazigate-System app"
-loadNRun "wazigate-system.tar"
 
 ################################################################################
 
-log 6 "Creating Wazigate-LoRa Forwarders app"
-loadNRun "wazigate-lora-forwarders.tar"
+log 3 "Loading docker Iamges"
 
-log 7 "Creating Wazigate-LoRa Redis app"
-loadNRun "redis.tar"
-
-log 8 "Creating Wazigate-LoRa PostgreSQL app"
-loadNRun "postgresql.tar"
-
-log 9 "Creating Wazigate-LoRa ChirptStack Gateway Bridge app"
-loadNRun "chirpstack-gateway-bridge.tar"
-
-log 10 "Creating Wazigate-LoRa ChirptStack Application Server app"
-loadNRun "chirpstack-application-server.tar"
-
-log 11 "Creating Wazigate-LoRa ChirptStack Network Server app"
-loadNRun "chirpstack-network-server.tar"
-
-log 12 "Creating Wazigate-LoRa app"
-loadNRun "wazigate-lora.tar"
+# Read from docker compose: load images
+readImageNames
+# Create containers
+docker-compose up -d
