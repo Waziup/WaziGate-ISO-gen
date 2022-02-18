@@ -1,10 +1,11 @@
 #!/bin/bash -e
 
 log () {
-  echo "Step $1/3: $2" > /tmp/wazigate-setup-step.txt
+  echo "Step $1/4: $2" > /tmp/wazigate-setup-step.txt
 }
 
-loadNRun () {
+# Load docker images, delete docker *.tar files
+load_and_run () {
   ending=".tar"
   filename="$1$ending"
 
@@ -15,7 +16,7 @@ loadNRun () {
   ########################################
 
   if [ -f $filename ]; then
-    echo "Creating container $1 from file: $filename"
+    echo "Loading image $1 from file: $filename"
     docker image load -i $filename
     rm $filename
     #docker-compose up -d $name # Now we can use docker-compose file
@@ -24,7 +25,8 @@ loadNRun () {
   fi
 }
 
-readImageNames () {
+# Read image names from docker-compose.yml and delete vendor 
+read_image_names () {
   declare -a IFS=$'' image_names=($(grep '^\s*image' docker-compose.yml | sed 's/image://'))
 
   for single_elemet in "${image_names[@]}"
@@ -34,8 +36,27 @@ readImageNames () {
     # Delete before "/"
     striped_elemet=${striped_elemet#*/}
 
-    loadNRun "$striped_elemet"
+    load_and_run "$striped_elemet"
   done
+}
+
+# Delete all connections associated with "WAZIGATE-AP"
+delete_connections () {
+  nmcli c down WAZIGATE-AP
+  nmcli connection delete uuid $(nmcli -f NAME,UUID -p c | grep WAZIGATE-AP | sed 's/WAZIGATE-AP//' | xargs)
+  rm -rf /etc/NetworkManager/system-connections/*
+}
+
+# Setup a new "WAZIGATE-AP" connection
+setup_new_connection () {
+  nmcli dev wifi hotspot ifname wlan0 con-name WAZIGATE-AP ssid $SSID password "loragateway"
+  nmcli connection modify WAZIGATE-AP \
+    connection.autoconnect true connection.autoconnect-priority -100 \
+    802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared ipv6.method auto \
+    wifi-sec.key-mgmt wpa-psk wifi-sec.proto wpa
+  # using down/up instead of reapply because '802-11-wireless.band' can not be changed on the fly
+  nmcli c down WAZIGATE-AP
+  nmcli c up WAZIGATE-AP
 }
 
 source .env
@@ -72,34 +93,32 @@ raspi-config nonint do_i2c 0
 
 log 2 "Configuring Access Point"
 
-# Create Access Point (if not exists)
-currentFullID=$(nmcli c show WAZIGATE-AP | grep "802-11-wireless.ssid" | sed 's/802-11-wireless.ssid://')
-currentMAC=${currentFullID#*_}
 
-if [ ! -f /etc/NetworkManager/system-connections/WAZIGATE_AP.nmconnection ]; then
-  nmcli dev wifi hotspot ifname wlan0 con-name WAZIGATE-AP ssid $SSID password "loragateway"
-  nmcli connection modify WAZIGATE-AP \
-    connection.autoconnect true connection.autoconnect-priority -100 \
-    802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared ipv6.method auto \
-    wifi-sec.key-mgmt wpa-psk wifi-sec.proto wpa
-  # using down/up instead of reapply because '802-11-wireless.band' can not be changed on the fly
-  nmcli c down WAZIGATE-AP
-  nmcli c up WAZIGATE-AP
-elif [ $currentFullID =~ WAZIGATE_[A-Z0-9]{12}$ ]; then #johann
-  nmcli connection modify WAZIGATE-AP \
-    connection.autoconnect true connection.autoconnect-priority -100 \
-    802-11-wireless.ssid=$SSID
-elif [ "currentMAC" != "${SSID#*_}"]; then #felix
-  nmcli connection modify WAZIGATE-AP \
-    connection.autoconnect true connection.autoconnect-priority -100 \
-    802-11-wireless.ssid=$SSID
+echo "Current MAC: ${SSID#*_}"
+
+declare -a IFS=$'' waziAPs=($(nmcli c show WAZIGATE-AP | grep "802-11-wireless.ssid" | sed 's/802-11-wireless.ssid://' | xargs ))
+for OUTPUT in ${waziAPs[@]}
+do
+  #echo "${OUTPUT#*_}"
+  if [ ${SSID#*_} != ${OUTPUT#*_} ]; then
+    echo "Foud other MAC in NetworkManager: ${OUTPUT#*_}"
+    delete_connections #"$waziAPs"
+  fi
+done
+
+echo "Check to setup a new connection..."
+
+if [ -f /etc/NetworkManager/system-connections/WAZIGATE-AP.nmconnection ]; then
+  echo "Setup a new connection"
+  setup_new_connection
 fi
 
 ################################################################################
 
 log 3 "Loading docker Iamges"
-
 # Read from docker compose: load images
-readImageNames
+read_image_names
+
+log 4 "Starting docker containers"
 # Create containers
 docker-compose up -d
