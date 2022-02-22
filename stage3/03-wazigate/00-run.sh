@@ -93,10 +93,6 @@ function read_from_compose {
 read_from_compose
 
 ################################################################################
-
-
-echo -e '\n\n# Add known common DNS server.\nstatic domain_name_servers=8.8.8.8' >> "$ROOTFS_DIR/etc/dhcpcd.conf"
-echo -e '\n\n# Interface wlan0 is managed by Network-Manager.\ndenyinterfaces wlan0' >> "$ROOTFS_DIR/etc/dhcpcd.conf"
 install -m 644 files/NetworkManager.conf "$ROOTFS_DIR/etc/NetworkManager/"
 
 # Run setup.sh as systemd service on boot  
