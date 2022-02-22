@@ -93,22 +93,19 @@ raspi-config nonint do_i2c 0
 
 log 2 "Configuring Access Point"
 
-
-echo "Current MAC: ${SSID#*_}"
-
-declare -a IFS=$'' waziAPs=($(nmcli c show WAZIGATE-AP | grep "802-11-wireless.ssid" | sed 's/802-11-wireless.ssid://' | xargs ))
-for OUTPUT in ${waziAPs[@]}
-do
-  #echo "${OUTPUT#*_}"
-  if [ ${SSID#*_} != ${OUTPUT#*_} ]; then
-    echo "Foud other MAC in NetworkManager: ${OUTPUT#*_}"
-    delete_connections #"$waziAPs"
-  fi
-done
-
-echo "Check to setup a new connection..."
-
+echo "Current MAC: $WAZIGATE_ID"
 if [ -f /etc/NetworkManager/system-connections/WAZIGATE-AP.nmconnection ]; then
+  declare -a IFS=$'' waziAPs=($(nmcli c show WAZIGATE-AP | grep "802-11-wireless.ssid" | sed 's/802-11-wireless.ssid://' | xargs ))
+
+  for OUTPUT in ${waziAPs[@]}
+  do
+    #echo "${OUTPUT#*_}"
+    if [ ${SSID#*_} != ${OUTPUT#*_} ]; then
+      echo "Foud other MAC in NetworkManager: ${OUTPUT#*_}"
+      delete_connections #"$waziAPs"
+    fi
+  done
+else
   echo "Setup a new connection"
   setup_new_connection
 fi

@@ -90,6 +90,7 @@ function read_from_compose {
     done
 }
 
+# One tar file for all images
 # docker rm -f $(docker ps -q)
 # docker image rm -f $(docker image ls -q)
 # docker-compose pull
@@ -101,22 +102,6 @@ read_from_compose
 ################################################################################
 
 
-# Setup Work
-
-# rm -f "$ROOTFS_DIR/etc/systemd/system/dhcpcd.service.d/wait.conf"
-# mv --backup=numbered "$ROOTFS_DIR/etc/dnsmasq.conf" "$ROOTFS_DIR/etc/dnsmasq.conf.orig"
-# echo 'interface=wlan0\n  dhcp-range=192.168.200.2,192.168.200.200,255.255.255.0,24h\n' > "$ROOTFS_DIR/etc/dnsmasq.conf"
-# 
-# cp files/hostapd.conf "$ROOTFS_DIR/etc/hostapd/hostapd.conf"
-# 
-# if ! grep -qFx 'DAEMON_CONF="/etc/hostapd/hostapd.conf"' "$ROOTFS_DIR/etc/default/hostapd"; then
-#   sed -i -e '$i \DAEMON_CONF="/etc/hostapd/hostapd.conf"\n' "$ROOTFS_DIR/etc/default/hostapd"
-# fi
-
-# cp --backup=numbered $ROOTFS_DIR/etc/wpa_supplicant/wpa_supplicant.conf "$ROOTFS_DIR/etc/wpa_supplicant/wpa_supplicant.conf.orig"
-
-echo '\n\n# Add known common DNS server.\nstatic domain_name_servers=8.8.8.8' >> "$ROOTFS_DIR/etc/dhcpcd.conf"
-echo '\n\n# Interface wlan0 is managed by Network-Manager.\ndenyinterfaces wlan0' >> "$ROOTFS_DIR/etc/dhcpcd.conf"
 install -m 644 files/NetworkManager.conf "$ROOTFS_DIR/etc/NetworkManager/"
 
 # Run setup.sh as systemd service on boot  
