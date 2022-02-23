@@ -68,7 +68,7 @@ function save_docker_image {
 
 function read_from_compose {
     # have to add a path
-    declare -a IFS=$'' image_names=($(grep '^\s*image' docker-compose.yml | sed 's/image://'))
+    declare -a IFS=$'' image_names=($(grep '^\s*image' files/wazigate/docker-compose.yml | sed 's/image://'))
     #declare -a IFS=$' ' platform=($(grep '^\s*platform' docker-compose.yml | sed 's/platform://')) # use yq instead
 
     i=0
