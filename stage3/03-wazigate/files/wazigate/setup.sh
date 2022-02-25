@@ -112,10 +112,10 @@ fi
 
 ################################################################################
 
-log 3 "Loading docker Iamges"
 # Read from docker compose: load images
+log 3 "Loading docker Images"
 read_image_names
 
-log 4 "Starting docker containers"
 # Create containers
+log 4 "Starting docker containers"
 docker-compose up -d
