@@ -10,21 +10,11 @@ if [ -z "$WAZIGATE_TAG" ]; then
 	WAZIGATE_TAG=$DEFAULT_WAZIGATE_TAG
 fi
 
-DEFAULT_WAZIGATE_REPO="https://github.com/Waziup/WaziGate.git"
-if [ -z "$WAZIGATE_REPO" ]; then
-	WAZIGATE_REPO=$DEFAULT_WAZIGATE_REPO
-fi
-
-# WAZIGATE_DIR=$ROOTFS_DIR/home/${FIRST_USER_NAME}/wazigate
 
 ################################################################################
 
 
 WAZIGATE_DIR=$ROOTFS_DIR/var/lib/wazigate
-
-# Download Wazigate Repo
-# git clone -b $WAZIGATE_BRANCH --single-branch $WAZIGATE_REPO $WAZIGATE_DIR
-cp -R files/wazigate $ROOTFS_DIR/var/lib
 
 chmod +x $WAZIGATE_DIR/wazigate-host/wazigate-host
 chmod +x $WAZIGATE_DIR/setup.sh
