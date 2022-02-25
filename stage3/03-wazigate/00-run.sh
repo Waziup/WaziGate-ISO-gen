@@ -48,7 +48,7 @@ function save_docker_image {
     echo "Using $1 docker image from $1.tar"
   else
     echo "Saving $2 to files/$1.tar ..."
-    docker image save ${2%:*} -o files/$1.tar
+    docker image save ${2} -o files/$1.tar
     #sudo chmod 644 files/$1.tar # For debug
   fi
 
@@ -67,7 +67,7 @@ function read_from_compose {
 
     for single_elemet in "${image_names[@]}"
     do
-        full_name=$single_elemet
+        full_name=$(echo '${single_elemet}' | envsubst)
         # Delete tags
         striped_elemet=${single_elemet%:*}
         # Delete before "/"
