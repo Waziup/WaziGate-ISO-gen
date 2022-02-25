@@ -77,7 +77,7 @@ function read_from_compose {
 
     for single_elemet in "${image_names[@]}"
     do
-        full_name=$(echo $single_elemet)
+        full_name=$(echo '${single_elemet}' | envsubst)
         # Delete tags
         striped_elemet=${single_elemet%:*}
         # Delete before "/"
