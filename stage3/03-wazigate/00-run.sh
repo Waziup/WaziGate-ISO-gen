@@ -10,11 +10,62 @@ apt-get update
 apt-get install -y -qq --no-install-recommends -t buster-backports libseccomp2
 EOF
 
+# Overwrite mongodb service file on host
+install -m 644 files/mongod.service "$ROOTFS_DIR/lib/systemd/system/"
+
+# Overwrite redis.conf file on host and make folder for socket file, change owner and group and replace redis.service file
+install -m 644 files/redis.conf "$ROOTFS_DIR/etc/redis/"
+mkdir "$ROOTFS_DIR/var/run/redis"
+chown redis:redis "$ROOTFS_DIR/var/run/redis"
+install -m 644 files/redis.service "$ROOTFS_DIR/etc/systemd/system/"
+
+
 # Install Network Manager config
 install -m 644 files/NetworkManager.conf "$ROOTFS_DIR/etc/NetworkManager/"
 
 # Change the kernel virtual memory accounting mode to: always overcommit, never check
 echo "vm.overcommit_memory = 1" >> $ROOTFS_DIR/etc/sysctl.conf
 
+# Reduce total amounts of writes
+
+# Disable swap file
+on_chroot <<EOF
+dphys-swapfile swapoff 
+dphys-swapfile uninstall
+systemctl disable dphys-swapfile
+EOF
+
+# Disable all journalctl logs
+install -m 644 files/rsyslog.conf "$ROOTFS_DIR/etc/"
+
+on_chroot <<EOF
+service rsyslog stop
+service rsyslog start
+EOF
+
+# Install rsync, alternative to cp
+apt install rsync
+
+#Install Log2RAM and copy configuration
+wget https://github.com/azlux/log2ram/archive/master.tar.gz -O "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
+tar xf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
+bash "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master/install.sh"
+rm -f "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
+rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master"
+install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
+
 # Show text-ui on login
-echo -e "sudo bash /var/lib/wazigate/wazigate-host/text-ui.sh" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
+#echo -e "sudo bash /var/lib/wazigate/wazigate-host/text-ui.sh" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
+
+
+# Enable Wazigate services
+on_chroot <<EOF
+systemctl enable wazigate-host
+
+systemctl enable mongod
+systemctl enable wazigate
+systemctl enable redis-server
+EOF
+
+# Create log file for setup
+touch "$ROOTFS_DIR/tmp/wazigate-setup-step.txt"
