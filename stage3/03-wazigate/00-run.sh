@@ -17,14 +17,10 @@ install -m 644 files/mongod.service "$ROOTFS_DIR/lib/systemd/system/"
 install -m 644 files/redis.conf "$ROOTFS_DIR/etc/redis/"
 # Make folder for socket file, change owner and group, on_chroot: because no user redis
 on_chroot <<EOF
-install -d -m 0755 -o redis -g redis "$ROOTFS_DIR/var/run/redis/"
+install -d -m 644 -o redis -g redis "$ROOTFS_DIR/var/run/redis/"
 EOF
-#mkdir "$ROOTFS_DIR/var/run/redis"
-#on_chroot <<EOF
-#chown redis:redis "$ROOTFS_DIR/var/run/redis/"
-#EOF
 # Replace redis.service file
-install -m 644 files/redis.service "$ROOTFS_DIR/etc/systemd/system/"
+install -m 644 files/redis-server.service "$ROOTFS_DIR/etc/systemd/system/multi-user.target.wants/"
 
 # Install Network Manager config
 install -m 644 files/NetworkManager.conf "$ROOTFS_DIR/etc/NetworkManager/"
@@ -38,18 +34,25 @@ echo "vm.overcommit_memory = 1" >> $ROOTFS_DIR/etc/sysctl.conf
 on_chroot <<EOF
 dphys-swapfile swapoff 
 dphys-swapfile uninstall
+update-rc.d dphys-swapfile remove
 systemctl disable dphys-swapfile
 EOF
 
 # Disable all journalctl logs
 install -m 644 files/rsyslog.conf "$ROOTFS_DIR/etc/"
 
-on_chroot <<EOF
-service rsyslog stop
-service rsyslog start
-EOF
+# on_chroot <<EOF
+# # unmount echo u > "$ROOTFS_DIR/proc/sysrq-trigger"
+# # sync echo s > "$ROOTFS_DIR/proc/sysrq-trigger"
+# tune2fs -O ^has_journal /dev/mmcblk0p2
+# e2fsck -fy /dev/mmcblk0p2
+# echo s > "$ROOTFS_DIR/proc/sysrq-trigger"
+# # reboot echo b > "$ROOTFS_DIR/proc/sysrq-trigger"
+# EOF
+sed -i 's/has_journal,\?//g;s/features \= *$//g' "$ROOTFS_DIR/etc/mke2fs.conf"
 
-# Install rsync, alternative to cp
+
+# Install rsync, alternative to cp, recommended by log2ram
 apt install rsync
 
 #Install Log2RAM and copy configuration
@@ -61,18 +64,14 @@ apt install rsync
 
 echo "deb [signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packages.azlux.fr/debian/ bullseye main" | sudo tee "$ROOTFS_DIR/etc/apt/sources.list.d/azlux.list"
 sudo wget -O "$ROOTFS_DIR/usr/share/keyrings/azlux-archive-keyring.gpg"  https://azlux.fr/repo.gpg
-
-## sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CA548A0A0312D8E6
 on_chroot <<EOF
-
 sudo apt update
 sudo apt install log2ram
 EOF
-
 install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 
 # Show text-ui on login
-#echo -e "sudo bash /var/lib/wazigate/wazigate-host/text-ui.sh" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
+echo -e "sudo bash /var/lib/wazigate/wazigate-host/text-ui.sh" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
 
 
 # Enable Wazigate services
@@ -84,4 +83,4 @@ systemctl enable wazigate
 EOF
 
 # Create log file for wazigate-setup
-touch "$ROOTFS_DIR/tmp/wazigate-setup-step.txt"
+#touch "$ROOTFS_DIR/tmp/wazigate-setup-step.txt"

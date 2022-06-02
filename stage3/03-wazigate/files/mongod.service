@@ -10,7 +10,7 @@ Group=mongodb
 EnvironmentFile=-/etc/default/mongod
 ExecStartPre=rm -f /var/lib/mongodb/mongod.lock
 ExecStartPre=mongod --config /etc/mongod.conf --repair
-ExecStart=mongod --config /etc/mongod.conf --fork --logpath /var/log/mongodb.log
+ExecStart=mongod --config /etc/mongod.conf
 PIDFile=/var/run/mongodb/mongod.pid
 # file size
 LimitFSIZE=infinity
