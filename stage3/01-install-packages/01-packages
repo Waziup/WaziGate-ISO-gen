@@ -1,1 +1,1 @@
-curl git network-manager vim wazigate mongodb-org redis-server
+curl git network-manager vim wazigate mongodb-org=4.4.14 mongodb-org-database=4.4.14 mongodb-org-server=4.4.14 mongodb-org-shell=4.4.14 mongodb-org-mongos=4.4.14 mongodb-org-tools=4.4.14 redis-server
