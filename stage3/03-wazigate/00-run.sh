@@ -15,9 +15,10 @@ install -m 644 files/mongod.service "$ROOTFS_DIR/lib/systemd/system/"
 
 # Overwrite redis.conf file on host 
 install -m 644 files/redis.conf "$ROOTFS_DIR/etc/redis/"
-# Make folder for socket file, change owner and group, on_chroot: because no user redis
+# Make folder for socket file and working dir, change owner and group, on_chroot: because no user redis
 on_chroot <<EOF
-install -d -m 644 -o redis -g redis "$ROOTFS_DIR/var/run/redis/"
+install -d -m 644 -o redis -g redis "/var/run/redis/"
+install -d -m 644 -o redis -g redis "/var/lib/redis/"
 EOF
 # Replace redis.service file
 install -m 644 files/redis-server.service "$ROOTFS_DIR/etc/systemd/system/multi-user.target.wants/"
