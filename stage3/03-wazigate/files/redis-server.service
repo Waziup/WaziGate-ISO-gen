@@ -39,6 +39,7 @@ RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 # recommended that you replace the following lines with "ProtectSystem=full".
 ProtectSystem=true
 ReadWriteDirectories=-/etc/redis
+ReadWriteDirectories=-/var/lib/redis
 
 [Install]
 WantedBy=multi-user.target
