@@ -18,7 +18,7 @@ install -m 644 files/redis.conf "$ROOTFS_DIR/etc/redis/"
 # Make folder for socket file and working dir, change owner and group, on_chroot: because no user redis
 on_chroot <<EOF
 install -d -m 644 -o redis -g redis "/var/run/redis/"
-install -d -m 644 -o redis -g redis "/var/lib/redis/"
+install -d -m 755 -o redis -g redis "/var/lib/redis/"
 chown redis:redis /var/run/redis
 EOF
 # Replace redis.service file
