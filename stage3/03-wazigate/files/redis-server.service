@@ -23,6 +23,7 @@ ReadOnlyDirectories=/
 ReadWritePaths=-/var/lib/redis
 ReadWritePaths=-/var/log/redis
 ReadWritePaths=-/var/run/redis
+ReadWritePaths=-/etc/redis
 
 NoNewPrivileges=true
 CapabilityBoundingSet=CAP_SETGID CAP_SETUID CAP_SYS_RESOURCE
@@ -40,6 +41,8 @@ RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 ProtectSystem=true
 ReadWriteDirectories=-/etc/redis
 ReadWriteDirectories=-/var/lib/redis
+ReadWriteDirectories=-/var/run/redis
+
 
 [Install]
 WantedBy=multi-user.target

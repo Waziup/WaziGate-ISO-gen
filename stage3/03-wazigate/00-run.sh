@@ -19,9 +19,10 @@ install -m 644 files/redis.conf "$ROOTFS_DIR/etc/redis/"
 on_chroot <<EOF
 install -d -m 644 -o redis -g redis "/var/run/redis/"
 install -d -m 644 -o redis -g redis "/var/lib/redis/"
+chmod redis:redis /var/run/redis
 EOF
 # Replace redis.service file
-install -m 644 files/redis-server.service "$ROOTFS_DIR/etc/systemd/system/multi-user.target.wants/"
+install -m 644 files/redis-server.service "$ROOTFS_DIR/lib/systemd/system/"
 
 # Install Network Manager config
 install -m 644 files/NetworkManager.conf "$ROOTFS_DIR/etc/NetworkManager/"
