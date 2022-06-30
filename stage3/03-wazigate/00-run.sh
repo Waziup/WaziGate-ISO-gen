@@ -73,13 +73,11 @@ EOF
 install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 
 # Show text-ui on login
-echo -e "sudo bash /var/lib/wazigate/wazigate-host/text-ui.sh" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
+echo -e "sudo bash /var/lib/wazigate/tools/text-ui.sh" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
 
 
 # Enable Wazigate services
 on_chroot <<EOF
-systemctl enable wazigate-host
-
 systemctl enable mongod
 systemctl enable wazigate
 EOF
