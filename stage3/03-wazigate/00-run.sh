@@ -73,11 +73,9 @@ EOF
 install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 
 # Copy text-ui shell script to host 
-install -m 755 files/wazi-config.sh "$ROOTFS_DIR/usr/bin/"
+install -m 755 files/wazi-config.sh "$ROOTFS_DIR/usr/bin/wazi-config"
 # Show text-ui on login
-echo -e "sudo bash /usr/bin/wazi-config.sh" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
-# Add path for wazi-config to bash
-echo 'alias wazi-config=/usr/bin/wazi-config.sh' >> ~/.bashrc 
+echo -e "# Add wazi-config on startup:\nsudo wazi-config" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
 
 
 # Enable Wazigate services
