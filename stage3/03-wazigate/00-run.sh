@@ -72,8 +72,12 @@ sudo apt install log2ram
 EOF
 install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 
+# Copy text-ui shell script to host 
+install -m 755 files/wazi-config.sh "$ROOTFS_DIR/usr/bin/"
 # Show text-ui on login
-echo -e "sudo bash /var/lib/wazigate/tools/text-ui.sh" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
+echo -e "sudo bash /usr/bin/wazi-config.sh" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
+# Add path for wazi-config to bash
+echo 'alias wazi-config=/usr/bin/wazi-config.sh' >> ~/.bashrc 
 
 
 # Enable Wazigate services
