@@ -86,3 +86,5 @@ EOF
 
 # Create log file for wazigate-setup
 #touch "$ROOTFS_DIR/tmp/wazigate-setup-step.txt"
+
+df -h
