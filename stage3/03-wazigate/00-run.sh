@@ -77,14 +77,20 @@ install -m 755 files/wazi-config.sh "$ROOTFS_DIR/usr/bin/wazi-config"
 # Show text-ui on login
 echo -e "# Add wazi-config on startup:\nsudo wazi-config" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
 
+# Copy reconnect_wifi shell script to host 
+install -m 755 files/reconnect_wifi.sh "$ROOTFS_DIR/usr/bin/reconnect_wifi"
+install -m 755 files/reconnect_wifi.service "$ROOTFS_DIR/etc/systemd/system/reconnect_wifi.service"
+install -m 755 files/reconnect_wifi.timer "$ROOTFS_DIR/etc/systemd/system/reconnect_wifi.timer"
+touch "$ROOT_FS/etc/do_not_reconnect_wifi"
+
+
 
 # Enable Wazigate services
 on_chroot <<EOF
 systemctl enable mongod
 systemctl enable wazigate
+systemctl enable reconnect_wifi
 EOF
 
 # Create log file for wazigate-setup
 #touch "$ROOTFS_DIR/tmp/wazigate-setup-step.txt"
-
-df -h

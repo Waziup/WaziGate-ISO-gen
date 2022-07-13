@@ -1,0 +1,12 @@
+[Unit]
+Description=Reconnect wifi service
+After=network-online.target
+Wants=network-online.target
+
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/reconnect_wifi
+
+[Install]
+WantedBy=multi-user.target
