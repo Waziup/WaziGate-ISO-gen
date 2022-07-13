@@ -115,6 +115,9 @@ do_force_ap_mode() {
     nmcli c down $(nmcli -f NAME,UUID,DEVICE -p c | grep wlan0 | xargs | awk '{ print $2 }')
     nmcli c up $(nmcli -f NAME,UUID -p c | grep WAZIGATE-AP | sed 's/WAZIGATE-AP//' | xargs)
 
+    # Touch file for no reconnect
+    touch "/etc/do_not_reconnect_wifi"
+
     do_network_info
 
   else
@@ -129,6 +132,8 @@ do_wifi_connect() {
   echo -e "\n\tConnecting to ${BLUE}${1}${NC}...\n"
   
   nmcli dev wifi connect ${1} password ${2}
+
+  rm -f "/etc/do_not_reconnect_wifi" 2> /dev/null
 
   do_network_info
 }
