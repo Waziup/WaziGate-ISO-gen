@@ -12,7 +12,7 @@ if [[ ${ACTIVE_WIFI} == 'WAZIGATE-AP' ]] && [[ -f "$ACCESS_POINT_SET_BY_USER" ]]
     echo "Access point was set by user: $ACCESS_POINT_SET_BY_USER file exists."
 # Check whether we have to delete do_not_reconnect file 
 elif [[ ${ACTIVE_WIFI} != 'WAZIGATE-AP' ]] && [[ -f "$ACCESS_POINT_SET_BY_USER" ]]; then
-    echo "Gateway is not in access point mode. Delete $ACCESS_POINT_SET_BY_USER."
+    echo "Gateway is not in access point mode. Delete file: $ACCESS_POINT_SET_BY_USER."
     rm -f "${ACCESS_POINT_SET_BY_USER}" 2> /dev/null
 # Check whether non user set access point was activated (wifi connection lost)
 elif [[ ${ACTIVE_WIFI} == 'WAZIGATE-AP' ]]; then

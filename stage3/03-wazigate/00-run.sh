@@ -89,7 +89,7 @@ touch "$ROOT_FS/etc/do_not_reconnect_wifi"
 on_chroot <<EOF
 systemctl enable mongod
 systemctl enable wazigate
-systemctl enable reconnect_wifi
+systemctl enable reconnect_wifi.timer
 EOF
 
 # Create log file for wazigate-setup
