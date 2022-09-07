@@ -10,8 +10,9 @@ apt-get update
 apt-get install -y -qq --no-install-recommends -t buster-backports libseccomp2
 EOF
 
-# Overwrite mongodb service file on host
+# Overwrite mongodb service and conf file on host
 install -m 644 files/mongod.service "$ROOTFS_DIR/lib/systemd/system/"
+install -m 644 files/mongod.conf "$ROOTFS_DIR/etc/"
 
 # Overwrite redis.conf file on host 
 install -m 644 files/redis.conf "$ROOTFS_DIR/etc/redis/"
