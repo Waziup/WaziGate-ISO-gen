@@ -176,9 +176,9 @@ CLOUD=waziup
 CLOUD_API=http://localhost/clouds/$CLOUD
 
 do_clouds() {
-  USERNAME=$(curl -s $CLOUD_API | yq ".username")
+  USERNAME=$(curl -s $CLOUD_API | grep ".username" | sed -r 's/.*.(.username":")//' | sed 's/".*//')
   if [ -n "$USERNAME" ]; then
-    PAUSED=$(curl -s $CLOUD_API | yq ".paused")
+    PAUSED=$(curl -s $CLOUD_API | grep "paused" | sed -r 's/.*.("paused":)//' |  sed 's/,.*//')
     if [[ $PAUSED == "false" ]]; then
       do_clouds_pause
     else
@@ -190,7 +190,7 @@ do_clouds() {
 }
 
 do_clouds_pause() {
-  USERNAME=$(curl -s $CLOUD_API | yq ".username")
+  USERNAME=$(curl -s $CLOUD_API | grep ".username" | sed -r 's/.*.(.username":")//' | sed 's/".*//')
   whiptail --yesno "Stop synchronization with cloud now?\nYou are logged in as '$USERNAME'.\n\nYou can change the username and/or password only when the synchronization is stopped." 20 60 2
   if [ $? -eq 0 ]; then # yes
     curl -X POST $CLOUD_API/paused -H "Content-Type: application/json" -d "true"
@@ -198,7 +198,7 @@ do_clouds_pause() {
 }
 
 do_clouds_menu() {
-  USERNAME=$(curl -s $CLOUD_API | yq ".username")
+  USERNAME=$(curl -s $CLOUD_API | grep ".username" | sed -r 's/.*.(.username":")//' | sed 's/".*//')
 
   FUN=$(whiptail --title "Cloud Sync '$USERNAME'" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Exit --ok-button Select \
       "1 Change Username" "" \
@@ -221,7 +221,7 @@ do_clouds_menu() {
 }
 
 do_clouds_username() {
-  USERNAME=$(curl -s $CLOUD_API | yq ".username")
+  USERNAME=$(curl -s $CLOUD_API | grep ".username" | sed -r 's/.*.(.username":")//' | sed 's/".*//')
   USERNAME=$(whiptail --inputbox "WaziCloud Account Mail/Name" 20 70 "$USERNAME" 3>&1 1>&2 2>&3)
   if [ -z "${USERNAME}" ]; then
     return 0
