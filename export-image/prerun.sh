@@ -69,7 +69,7 @@ if [ "${NO_PRERUN_QCOW2}" = "0" ]; then
 	echo "/boot: offset $BOOT_OFFSET, length $BOOT_LENGTH"
 	echo "/:     offset $ROOT_OFFSET, length $ROOT_LENGTH"
 
-	ROOT_FEATURES="^huge_file"
+	ROOT_FEATURES="^has_journal,^huge_file"
 	for FEATURE in metadata_csum 64bit; do
 	if grep -q "$FEATURE" /etc/mke2fs.conf; then
 		ROOT_FEATURES="^$FEATURE,$ROOT_FEATURES"
