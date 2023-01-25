@@ -56,7 +56,9 @@ sed -i 's/has_journal,\?//g;s/features \= *$//g' "$ROOTFS_DIR/etc/mke2fs.conf"
 
 
 # Install rsync, alternative to cp, recommended by log2ram
-apt install rsync
+on_chroot <<EOF
+apt-get install -y -qq --no-install-recommends rsync
+EOF
 
 #Install Log2RAM and copy configuration
 # wget https://github.com/azlux/log2ram/archive/master.tar.gz -O "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
@@ -68,8 +70,8 @@ apt install rsync
 echo "deb [signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packages.azlux.fr/debian/ bullseye main" | sudo tee "$ROOTFS_DIR/etc/apt/sources.list.d/azlux.list"
 sudo wget -O "$ROOTFS_DIR/usr/share/keyrings/azlux-archive-keyring.gpg"  https://azlux.fr/repo.gpg
 on_chroot <<EOF
-sudo apt update
-sudo apt install -y -qq --no-install-recommends log2ram
+apt-get update
+apt-get install -y -qq --no-install-recommends log2ram
 EOF
 install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 
@@ -80,8 +82,8 @@ echo -e "# Add wazi-config on startup:\nsudo wazi-config" >> "$ROOTFS_DIR/home/$
 
 # Install Network Time Protocol (NTP) to sync time during runtime
 on_chroot <<EOF
-sudo apt install -y -qq --no-install-recommends ntp
-sudo service ntp start 
+apt-get install -y -qq --no-install-recommends ntp
+service ntp start 
 EOF
 
 # Copy reconnect_wifi shell script to host 
