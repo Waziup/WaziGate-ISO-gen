@@ -69,7 +69,7 @@ echo "deb [signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packa
 sudo wget -O "$ROOTFS_DIR/usr/share/keyrings/azlux-archive-keyring.gpg"  https://azlux.fr/repo.gpg
 on_chroot <<EOF
 sudo apt update
-sudo apt install log2ram
+sudo apt install -y -qq --no-install-recommends log2ram
 EOF
 install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 
@@ -77,6 +77,12 @@ install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 install -m 755 files/wazi-config.sh "$ROOTFS_DIR/usr/bin/wazi-config"
 # Show text-ui on login
 echo -e "# Add wazi-config on startup:\nsudo wazi-config" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
+
+# Install Network Time Protocol (NTP) to sync time during runtime
+on_chroot <<EOF
+sudo apt install -y -qq --no-install-recommends ntp
+sudo service ntp start 
+EOF
 
 # Copy reconnect_wifi shell script to host 
 install -m 755 files/reconnect_wifi.sh "$ROOTFS_DIR/usr/bin/reconnect_wifi"
