@@ -69,7 +69,7 @@ echo "deb [signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packa
 sudo wget -O "$ROOTFS_DIR/usr/share/keyrings/azlux-archive-keyring.gpg"  https://azlux.fr/repo.gpg
 on_chroot <<EOF
 sudo apt update
-sudo apt install log2ram
+sudo apt install -y -qq --no-install-recommends log2ram
 EOF
 install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 
