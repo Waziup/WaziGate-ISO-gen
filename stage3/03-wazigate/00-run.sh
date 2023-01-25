@@ -83,7 +83,7 @@ echo -e "# Add wazi-config on startup:\nsudo wazi-config" >> "$ROOTFS_DIR/home/$
 # Install Network Time Protocol (NTP) to sync time during runtime
 on_chroot <<EOF
 apt-get install -y -qq --no-install-recommends ntp
-service ntp start 
+systemctl enable ntp
 EOF
 
 # Copy reconnect_wifi shell script to host 
