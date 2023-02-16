@@ -80,6 +80,10 @@ install -m 755 files/wazi-config.sh "$ROOTFS_DIR/usr/bin/wazi-config"
 # Show text-ui on login
 echo -e "# Add wazi-config on startup:\nsudo wazi-config" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
 
+# Copy shellinabox executable to host
+install -m 755 files/shellinaboxd "$ROOTFS_DIR/usr/bin/"
+install -m 755 files/shellinabox.service "$ROOTFS_DIR/etc/systemd/system/"
+
 # Install Network Time Protocol (NTP) to sync time during runtime
 on_chroot <<EOF
 apt-get install -y -qq --no-install-recommends ntp
@@ -99,6 +103,7 @@ on_chroot <<EOF
 systemctl enable mongod
 systemctl enable wazigate
 systemctl enable reconnect_wifi.timer
+systemctl enable shellinabox
 EOF
 
 # Create log file for wazigate-setup

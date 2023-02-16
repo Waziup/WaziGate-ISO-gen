@@ -1,0 +1,13 @@
+[Unit]
+Description=ShellInABox service for remote SSH connection
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/shellinaboxd  -t -d --disable-ssl-menu -s /:AUTH:HOME:/bin/bash
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
