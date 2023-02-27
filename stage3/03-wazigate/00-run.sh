@@ -13,6 +13,9 @@ EOF
 # Overwrite mongodb service and conf file on host
 install -m 644 files/mongod.service "$ROOTFS_DIR/lib/systemd/system/"
 install -m 644 files/mongod.conf "$ROOTFS_DIR/etc/"
+on_chroot <<EOF
+sudo apt-mark hold mongodb-org mongodb-org-server mongodb-org-shell mongodb-org-mongos mongodb-org-tools
+EOF
 
 # Overwrite redis.conf file on host 
 install -m 644 files/redis.conf "$ROOTFS_DIR/etc/redis/"
