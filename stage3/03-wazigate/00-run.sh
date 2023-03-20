@@ -68,8 +68,7 @@ wget https://github.com/azlux/log2ram/archive/master.tar.gz -O "$ROOTFS_DIR/home
 tar -xf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz" -C "$ROOTFS_DIR/home/$FIRST_USER_NAME/"
 chmod +x "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master/install.sh"
 on_chroot <<EOF
-# log2ram
-mkdir -p /usr/local/bin/
+cd /home/$FIRST_USER_NAME/log2ram-master/
 install -m 644 log2ram.service /etc/systemd/system/log2ram.service
 install -m 644 log2ram-daily.service /etc/systemd/system/log2ram-daily.service
 install -m 644 log2ram-daily.timer /etc/systemd/system/log2ram-daily.timer
