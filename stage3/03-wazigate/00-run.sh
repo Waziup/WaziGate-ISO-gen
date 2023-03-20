@@ -64,18 +64,19 @@ apt-get install -y -qq --no-install-recommends rsync
 EOF
 
 #Install Log2RAM and copy configuration
-# wget https://github.com/azlux/log2ram/archive/master.tar.gz -O "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
-# tar -xf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
-# bash "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master/install.sh"
-# rm -f "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
-# rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master"
+wget https://github.com/azlux/log2ram/archive/master.tar.gz -O "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
+tar -xf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
+chmod +x "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master/install.sh"
+bash "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master/install.sh"
+rm -f "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
+rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master"
 
-echo "deb [signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packages.azlux.fr/debian/ bullseye main" | sudo tee "$ROOTFS_DIR/etc/apt/sources.list.d/azlux.list"
-sudo wget -O "$ROOTFS_DIR/usr/share/keyrings/azlux-archive-keyring.gpg"  https://azlux.fr/repo.gpg
-on_chroot <<EOF
-apt-get update
-apt-get install -y -qq --no-install-recommends log2ram
-EOF
+# echo "deb [signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packages.azlux.fr/debian/ bullseye main" | sudo tee "$ROOTFS_DIR/etc/apt/sources.list.d/azlux.list"
+# sudo wget -O "$ROOTFS_DIR/usr/share/keyrings/azlux-archive-keyring.gpg"  https://azlux.fr/repo.gpg
+# on_chroot <<EOF
+# apt-get update
+# apt-get install -y -qq --no-install-recommends log2ram
+# EOF
 install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 
 # Copy text-ui shell script to host 
