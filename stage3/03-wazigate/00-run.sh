@@ -65,9 +65,12 @@ EOF
 
 #Install Log2RAM and copy configuration
 wget https://github.com/azlux/log2ram/archive/master.tar.gz -O "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
-tar -xf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
+mkdir "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master/"
+tar -xf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz" -C "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master/"
 chmod +x "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master/install.sh"
-bash "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master/install.sh"
+on_chroot <<EOF
+bash "/home/$FIRST_USER_NAME/log2ram-master/install.sh"
+EOF
 rm -f "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram.tar.gz"
 rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master"
 
