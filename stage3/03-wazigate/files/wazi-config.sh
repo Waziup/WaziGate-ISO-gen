@@ -18,9 +18,9 @@ NC='\033[0m'
 # Is service active? = active and is wazigate-system docker container is healthy 
 sp='/-\|'
 SYSTEM_STATUS=
-while [ "$(systemctl is-active wazigate)" != "active" ] && [ "$(SYSTEM_STATUS)" != "healthy" ];
+while [ "$(systemctl is-active wazigate)" != "active" ] && [ "$SYSTEM_STATUS" != "healthy" ];
 do
-  SYSTEM_STATUS=`docker inspect -f {{.State.Health.Status}} waziup.wazigate-system`
+  SYSTEM_STATUS=`docker inspect -f {{.State.Health.Status}} waziup.wazigate-system 2>/dev/null`
   printf '\r%.1s %s' "$sp" "$(</tmp/wazigate-setup-step.txt)"
   sp=${sp#?}${sp%???}
   sleep 0.2
