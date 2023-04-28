@@ -40,7 +40,6 @@ elif [[ ${ACTIVE_WIFI} == 'WAZIGATE-AP' ]]; then
                     best_wifi_in_range="$output:$current_signal_strength"
                 else 
                     #echo "compare : old: $(echo $best_wifi_in_range | cut -d ":" -f2-) new: $current_signal_strength"
-
                     if [[ current_signal_strength -ge $(echo $best_wifi_in_range | cut -d ":" -f2-) ]]; then
                         echo "Found another Access point with better signal."
                         best_wifi_in_range="$output:$current_signal_strength"
@@ -50,10 +49,15 @@ elif [[ ${ACTIVE_WIFI} == 'WAZIGATE-AP' ]]; then
         fi
     done
 
+    # no known wifi in range with good signal
+    if [ -z ${best_wifi_in_range} ]; then
+        echo "No known wifi in range, stay in access point mode for now. Access point had not been set by user."
     # connect to best wifi in range
-    echo "SSID with best signal: $best_wifi_in_range."
-    nmcli dev wifi connect $(echo $best_wifi_in_range | cut -d ":" -f1)
-    unset output
+    else
+        echo "SSID with best signal: $best_wifi_in_range."
+        nmcli dev wifi connect $(echo $best_wifi_in_range | cut -d ":" -f1)
+        unset output
+    fi
 
 else
     echo "Gateway is still connected to access point."
