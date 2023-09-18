@@ -129,7 +129,7 @@ rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/libc6_2.37-10_arm64.deb"
 on_chroot <<EOF
 cd /home/$FIRST_USER_NAME/
 wget http://ftp.de.debian.org/debian/pool/main/q/quickjs/quickjs_2021.03.27-1_arm64.deb
-dpkg -i quickjs.deb
+dpkg -i quickjs_2021.03.27-1_arm64.deb
 EOF
 rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/quickjs.deb"
 
