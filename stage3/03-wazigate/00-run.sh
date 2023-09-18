@@ -117,6 +117,20 @@ apt-get install -y -qq --no-install-recommends ntp
 systemctl enable ntp
 EOF
 
+# Install libc6 3.27 to support also quickjs
+on_chroot <<EOF
+wget http://ftp.de.debian.org/debian/pool/main/g/glibc/libc6_2.37-10_arm64.deb -O "$ROOTFS_DIR/home/$FIRST_USER_NAME/libc6_2.37-10_arm64.de"
+dpkg --force-all -i libc6_2.37-10_arm64.deb
+EOF
+rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/libc6_2.37-10_arm64.de"
+
+# Install QuickJs for custom JS codecs
+on_chroot <<EOF
+wget http://ftp.de.debian.org/debian/pool/main/q/quickjs/quickjs_2021.03.27-1_arm64.deb -O "$ROOTFS_DIR/home/$FIRST_USER_NAME/quickjs.deb"
+dpkg -i quickjs.deb
+EOF
+rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/quickjs.deb"
+
 # Copy reconnect_wifi shell script to host 
 install -m 755 files/reconnect_wifi.sh "$ROOTFS_DIR/usr/bin/reconnect_wifi"
 install -m 755 files/reconnect_wifi.service "$ROOTFS_DIR/etc/systemd/system/reconnect_wifi.service"
