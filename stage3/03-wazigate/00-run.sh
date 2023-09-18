@@ -120,7 +120,7 @@ EOF
 # Install libc6 3.27 to support also quickjs
 on_chroot <<EOF
 cd /home/$FIRST_USER_NAME/
-wget http://ftp.de.debian.org/debian/pool/main/g/glibc/libc6_2.37-10_arm64.deb"
+wget http://ftp.de.debian.org/debian/pool/main/g/glibc/libc6_2.37-10_arm64.deb
 dpkg --force-all -i libc6_2.37-10_arm64.deb
 EOF
 rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/libc6_2.37-10_arm64.deb"
@@ -128,7 +128,7 @@ rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/libc6_2.37-10_arm64.deb"
 # Install QuickJs for custom JS codecs
 on_chroot <<EOF
 cd /home/$FIRST_USER_NAME/
-wget http://ftp.de.debian.org/debian/pool/main/q/quickjs/quickjs_2021.03.27-1_arm64.deb"
+wget http://ftp.de.debian.org/debian/pool/main/q/quickjs/quickjs_2021.03.27-1_arm64.deb
 dpkg -i quickjs.deb
 EOF
 rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/quickjs.deb"
