@@ -110,28 +110,14 @@ EOF
 install -m 755 files/shellinaboxd "$ROOTFS_DIR/usr/bin/"
 install -m 755 files/shellinabox.service "$ROOTFS_DIR/etc/systemd/system/"
 
-
 # Install Network Time Protocol (NTP) to sync time during runtime
 on_chroot <<EOF
 apt-get install -y -qq --no-install-recommends ntp
 systemctl enable ntp
 EOF
 
-# Install libc6 3.27 to support also quickjs
-on_chroot <<EOF
-cd /home/$FIRST_USER_NAME/
-wget http://ftp.de.debian.org/debian/pool/main/g/glibc/libc6_2.37-10_arm64.deb
-dpkg --force-all -i libc6_2.37-10_arm64.deb
-EOF
-rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/libc6_2.37-10_arm64.deb"
-
-# Install QuickJs for custom JS codecs
-on_chroot <<EOF
-cd /home/$FIRST_USER_NAME/
-wget http://ftp.de.debian.org/debian/pool/main/q/quickjs/quickjs_2021.03.27-1_arm64.deb
-dpkg -i quickjs_2021.03.27-1_arm64.deb
-EOF
-rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/quickjs.deb"
+# Install builded qjs, because apt and deb where not possible because of conflicts with libc6 and locales(needed)
+install -m 755 files/qjs "$ROOTFS_DIR/usr/bin/"
 
 # Copy reconnect_wifi shell script to host 
 install -m 755 files/reconnect_wifi.sh "$ROOTFS_DIR/usr/bin/reconnect_wifi"
