@@ -98,8 +98,6 @@ rm -rf "$ROOTFS_DIR/home/$FIRST_USER_NAME/log2ram-master"
 # EOF
 install -m 644 files/log2ram.conf "$ROOTFS_DIR/etc/"
 
-# Copy text-ui shell script to host 
-install -m 755 files/wazi-config.sh "$ROOTFS_DIR/usr/bin/wazi-config"
 # Show text-ui on login
 echo -e "# Add wazi-config on startup:\nsudo wazi-config" >> "$ROOTFS_DIR/home/$FIRST_USER_NAME/.profile"
 
